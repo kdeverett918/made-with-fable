@@ -25,3 +25,8 @@ as $$
 $$;
 
 revoke execute on function public.my_recent_counts() from anon;
+
+-- tighten grants: trigger function never API-callable; rate-limit helper signed-in only
+revoke all on function public.bump_follow_counts() from public, anon, authenticated;
+revoke all on function public.my_recent_counts() from public, anon;
+grant execute on function public.my_recent_counts() to authenticated;
