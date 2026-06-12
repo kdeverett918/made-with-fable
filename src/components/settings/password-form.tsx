@@ -41,16 +41,18 @@ export function PasswordForm() {
     return (
       <div className="border-ink border-2 p-5" role="status">
         <p className="font-display text-accent text-3xl uppercase">Password set</p>
-        <p className="label-mono text-muted mt-2">You are signed in. Taking you to the board…</p>
+        <p className="label-mono text-muted mt-2">You are signed in. Taking you to the board...</p>
       </div>
     )
   }
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <label className="block">
+      <label className="block" htmlFor="new-password">
         <span className="label-mono mb-2 block font-bold">New password</span>
         <Input
+          id="new-password"
+          name="new-password"
           type="password"
           required
           minLength={8}
@@ -63,9 +65,11 @@ export function PasswordForm() {
           8+ characters with letters and a number
         </span>
       </label>
-      <label className="block">
+      <label className="block" htmlFor="confirm-password">
         <span className="label-mono mb-2 block font-bold">Confirm password</span>
         <Input
+          id="confirm-password"
+          name="confirm-password"
           type="password"
           required
           minLength={8}

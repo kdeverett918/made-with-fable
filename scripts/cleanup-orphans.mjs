@@ -1,6 +1,22 @@
 // Deletes storage objects in the `media` bucket that no row references and
 // that are older than MIN_AGE_HOURS (so in-flight submissions are safe).
 // Requires: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY. Pass --dry-run to preview.
+import { existsSync, readFileSync } from 'node:fs'
+import path from 'node:path'
+
+function loadEnvFile(file) {
+  if (!existsSync(file)) return
+  for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {
+    const match = line.match(/^\s*([^#][^=]+)=(.*)\s*$/)
+    if (!match) continue
+    const key = match[1].trim()
+    const value = match[2].trim().replace(/^['"]|['"]$/g, '')
+    if (!process.env[key]) process.env[key] = value
+  }
+}
+
+loadEnvFile(path.join(process.cwd(), '.env.local'))
+
 const SUPABASE_URL = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 const DRY = process.argv.includes('--dry-run')
@@ -31,7 +47,7 @@ async function listAll(prefix) {
     const items = await res.json()
     for (const item of items) {
       if (item.id === null) {
-        // folder — recurse
+        // folder - recurse
         out.push(...(await listAll(prefix ? `${prefix}/${item.name}` : item.name)))
       } else {
         out.push({ path: prefix ? `${prefix}/${item.name}` : item.name, created: item.created_at })

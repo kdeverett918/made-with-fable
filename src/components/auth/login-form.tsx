@@ -66,7 +66,7 @@ export function LoginForm() {
     if (signInError) {
       setError(
         /invalid login credentials/i.test(signInError.message)
-          ? 'Wrong email or password. If you signed up with a magic link or Google, use those — or reset your password below.'
+          ? 'Wrong email or password. If you signed up with a magic link or Google, use those - or reset your password below.'
           : signInError.message,
       )
       return
@@ -96,7 +96,7 @@ export function LoginForm() {
 
   async function forgotPassword() {
     if (!email.trim()) {
-      setError('Enter your email first, then tap “Forgot password” again.')
+      setError('Enter your email first, then tap "Forgot password" again.')
       return
     }
     setError(null)
@@ -216,9 +216,11 @@ export function LoginForm() {
       </div>
 
       <form onSubmit={method === 'password' ? submitPassword : sendMagicLink} className="space-y-3">
-        <label className="block">
+        <label className="block" htmlFor="login-email">
           <span className="label-mono mb-2 block font-bold">Email address</span>
           <Input
+            id="login-email"
+            name="email"
             type="email"
             required
             placeholder="you@example.com"
@@ -230,9 +232,11 @@ export function LoginForm() {
         </label>
 
         {method === 'password' && (
-          <label className="block">
+          <label className="block" htmlFor="login-password">
             <span className="label-mono mb-2 block font-bold">Password</span>
             <Input
+              id="login-password"
+              name="password"
               type="password"
               required
               minLength={8}
@@ -270,7 +274,7 @@ export function LoginForm() {
             }}
             className="text-accent cursor-pointer font-bold hover:underline"
           >
-            {creating ? '← Have an account? Sign in' : 'New here? Create account'}
+            {creating ? '<- Have an account? Sign in' : 'New here? Create account'}
           </button>
           {!creating && (
             <button

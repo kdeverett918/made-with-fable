@@ -2,7 +2,7 @@ name: keep-alive
 
 on:
   schedule:
-    # every 10 minutes — keeps the free Render instance warm and Supabase active
+    # every 10 minutes - keeps the free Render instance warm and Supabase active
     - cron: '*/10 * * * *'
   workflow_dispatch:
 

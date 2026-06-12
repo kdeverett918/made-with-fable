@@ -2,7 +2,7 @@ name: storage-cleanup
 
 on:
   schedule:
-    # weekly, Sunday 10:00 UTC — after the backup
+    # weekly, Sunday 10:00 UTC - after the backup
     - cron: '0 10 * * 0'
   workflow_dispatch:
 

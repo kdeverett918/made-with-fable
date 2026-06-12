@@ -33,7 +33,7 @@ jobs:
             > backup.sql.gz.enc
           ls -la backup.sql.gz.enc
 
-      # repo is public — the dump is AES-encrypted with BACKUP_PASSPHRASE
+      # repo is public - the dump is AES-encrypted with BACKUP_PASSPHRASE
       # (also in .env.local locally). Decrypt with:
       #   openssl enc -d -aes-256-cbc -pbkdf2 -pass pass:<passphrase> \
       #     -in backup.sql.gz.enc | gunzip > backup.sql

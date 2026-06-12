@@ -122,19 +122,6 @@ const projects = [
     prompt:
       'Create a boss-rush game with a huge center boss, cooldown abilities, wave pressure, score, and visible player feedback.',
   },
-  {
-    slug: 'sparks-flappy',
-    title: 'Sparks Flappy',
-    category: 'games',
-    liveUrl: `${gameBase}/sparks-flappy/index.html`,
-    video: 'seed-assets/final/sparks-flappy.mp4',
-    poster: 'seed-assets/prepared/sparks-flappy.webp',
-    tags: ['game', 'one-button', 'kids'],
-    story:
-      'A one-button browser game designed for instant understanding: tap, survive, score, retry, and keep the loop friendly.',
-    prompt:
-      'Make a one-button side-scroller with friendly art, simple physics, score, restart, and mobile-friendly controls.',
-  },
 ]
 
 function contentType(file) {
@@ -185,7 +172,11 @@ async function oneByUsername(username) {
 async function findDizzyProfile() {
   const explicitId = process.env.DIZZY_USER_ID
   if (explicitId) {
-    const { data, error } = await supabase.from('profiles').select('*').eq('id', explicitId).single()
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', explicitId)
+      .single()
     if (error) throw error
     return data
   }
@@ -196,7 +187,8 @@ async function findDizzyProfile() {
   const previousUsername = process.env.DIZZY_CURRENT_USERNAME
   if (previousUsername) {
     const previous = await oneByUsername(previousUsername)
-    if (!previous) throw new Error(`No profile found for DIZZY_CURRENT_USERNAME=${previousUsername}`)
+    if (!previous)
+      throw new Error(`No profile found for DIZZY_CURRENT_USERNAME=${previousUsername}`)
     return previous
   }
 
@@ -252,7 +244,10 @@ async function seedTags(names) {
     { onConflict: 'name', ignoreDuplicates: true },
   )
   if (error) throw error
-  const { data, error: selectError } = await supabase.from('tags').select('id, name').in('name', unique)
+  const { data, error: selectError } = await supabase
+    .from('tags')
+    .select('id, name')
+    .in('name', unique)
   if (selectError) throw selectError
   return data ?? []
 }
