@@ -16,14 +16,25 @@ export function sanitizeRedirectPath(value: string | null | undefined) {
   }
 }
 
-export function authCallbackUrl(origin: string, redirectTo: string | null | undefined) {
-  const url = new URL('/auth/callback', origin)
-  url.searchParams.set('redirectTo', sanitizeRedirectPath(redirectTo))
-  return url.toString()
+/**
+ * Supabase's redirect allowlist globs do not match query strings — a
+ * redirect_to with `?redirectTo=` is silently replaced by the Site URL,
+ * stranding the auth code on the home page. So the auth redirect URLs stay
+ * bare and the post-auth destination travels in this short-lived cookie.
+ */
+export const REDIRECT_COOKIE = 'mwf-redirect'
+
+/** Client-side: remember where to land after auth completes. */
+export function rememberRedirect(redirectTo: string | null | undefined) {
+  const path = sanitizeRedirectPath(redirectTo)
+  const secure = typeof location !== 'undefined' && location.protocol === 'https:' ? '; secure' : ''
+  document.cookie = `${REDIRECT_COOKIE}=${encodeURIComponent(path)}; path=/; max-age=600; samesite=lax${secure}`
 }
 
-export function authConfirmUrl(origin: string, redirectTo: string | null | undefined) {
-  const url = new URL('/auth/confirm', origin)
-  url.searchParams.set('redirectTo', sanitizeRedirectPath(redirectTo))
-  return url.toString()
+export function authCallbackUrl(origin: string) {
+  return new URL('/auth/callback', origin).toString()
+}
+
+export function authConfirmUrl(origin: string) {
+  return new URL('/auth/confirm', origin).toString()
 }

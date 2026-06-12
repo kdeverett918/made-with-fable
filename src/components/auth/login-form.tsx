@@ -4,7 +4,12 @@ import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Mail } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
-import { authCallbackUrl, authConfirmUrl, sanitizeRedirectPath } from '@/lib/auth/redirect'
+import {
+  authCallbackUrl,
+  authConfirmUrl,
+  rememberRedirect,
+  sanitizeRedirectPath,
+} from '@/lib/auth/redirect'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
@@ -32,13 +37,14 @@ export function LoginForm() {
 
   async function submitPassword(e: React.FormEvent) {
     e.preventDefault()
+    rememberRedirect(redirectTo)
     setError(null)
     setBusy(true)
     if (creating) {
       const { data, error: signUpError } = await supabase().auth.signUp({
         email: email.trim(),
         password,
-        options: { emailRedirectTo: authConfirmUrl(location.origin, redirectTo) },
+        options: { emailRedirectTo: authConfirmUrl(location.origin) },
       })
       setBusy(false)
       if (signUpError) {
@@ -77,12 +83,13 @@ export function LoginForm() {
 
   async function sendMagicLink(e: React.FormEvent) {
     e.preventDefault()
+    rememberRedirect(redirectTo)
     setError(null)
     setBusy(true)
     const { error: otpError } = await supabase().auth.signInWithOtp({
       email: email.trim(),
       options: {
-        emailRedirectTo: authCallbackUrl(location.origin, redirectTo),
+        emailRedirectTo: authCallbackUrl(location.origin),
         shouldCreateUser: true,
       },
     })
@@ -102,7 +109,7 @@ export function LoginForm() {
     setError(null)
     setBusy(true)
     const { error: resetError } = await supabase().auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: authConfirmUrl(location.origin, '/settings/password'),
+      redirectTo: authConfirmUrl(location.origin),
     })
     setBusy(false)
     if (resetError) {
@@ -113,11 +120,12 @@ export function LoginForm() {
   }
 
   async function signInWithGoogle() {
+    rememberRedirect(redirectTo)
     setOauthLoading(true)
     setError(null)
     const { error: oauthError } = await supabase().auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: authCallbackUrl(location.origin, redirectTo) },
+      options: { redirectTo: authCallbackUrl(location.origin) },
     })
     if (oauthError) {
       setError('Google sign-in hit a snag. Try email instead.')
