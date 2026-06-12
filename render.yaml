@@ -6,7 +6,9 @@ services:
     plan: free
     repo: https://github.com/kdeverett918/made-with-fable
     branch: main
-    buildCommand: npm ci && npm run build && cp -r .next/static .next/standalone/.next/static && cp -r public .next/standalone/public
+    # npm install (not ci): npm's lockfile bug skips wasm32-side optional deps
+    # (@emnapi/*) when the lock is generated on Windows, which breaks npm ci on linux
+    buildCommand: npm install && npm run build && cp -r .next/static .next/standalone/.next/static && cp -r public .next/standalone/public
     startCommand: HOSTNAME=0.0.0.0 node .next/standalone/server.js
     healthCheckPath: /api/health
     envVars:
