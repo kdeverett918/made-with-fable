@@ -47,6 +47,13 @@ export default async function ProfileSettingsPage() {
             </aside>
           </section>
           <ProfileForm profile={profile} userId={user.id} />
+
+          <a
+            href="/settings/password"
+            className="label-mono border-ink hover:bg-ink hover:text-background mt-8 block border-2 px-4 py-3 font-bold transition-colors"
+          >
+            Set or change your password →
+          </a>
         </Container>
       </main>
       <Footer />
