@@ -168,8 +168,8 @@ export function Sidebar({
 
         <section className="hidden p-4 lg:block">
           <p className="label-mono text-ink leading-relaxed">
-            <span className="text-accent">*</span> Fable is here for a limited time. Browse the
-            work. Copy the prompts. Submit something of your own.
+            <span className="text-accent">*</span> Fable is here for a limited time. A showcase
+            of real products, games, and art people shipped with it.
           </p>
           <Link href="/about" className="label-mono text-accent mt-3 inline-block hover:underline">
             Learn more →

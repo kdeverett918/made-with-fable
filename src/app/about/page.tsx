@@ -20,13 +20,14 @@ export default function AboutPage() {
 
           <div className="border-ink mt-6 space-y-4 border-2 p-5 text-[15px] leading-relaxed sm:p-6">
             <p className="text-ink">
-              Claude Fable 5 is here for a limited time — and people are building remarkable things
-              with it. This gallery is a community space to show off those creations: websites,
-              games, art, tools, agents, writing, music, and everything in between.
+              Claude Fable 5 is here for a limited time — and people are shipping remarkable
+              things with it. This gallery is where that work gets shown off: SaaS products,
+              games, art, websites, tools, agents, and everything in between.
             </p>
             <p className="text-muted">
-              Every approved project can include the prompt behind it, so the gallery doubles as a
-              library of ideas. See something inspiring? Copy the prompt and remix it.
+              This is a showcase, not a tutorial site. Post the thing you built, link the live
+              version, and let the work speak. The story behind it is welcome; the spotlight stays
+              on what you made.
             </p>
             <p className="label-mono text-muted-foreground">
               An independent community project, not affiliated with Anthropic.

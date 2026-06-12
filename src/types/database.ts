@@ -99,6 +99,7 @@ export interface FeedItem {
 }
 
 export const CATEGORIES = [
+  { slug: 'saas', name: 'SaaS' },
   { slug: 'websites', name: 'Websites' },
   { slug: 'games', name: 'Games' },
   { slug: 'art', name: 'Art' },
