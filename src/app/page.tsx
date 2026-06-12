@@ -49,7 +49,7 @@ export default async function Home({ searchParams }: HomeProps) {
       <Header />
       <main id="main" className="overflow-x-clip">
         <h1
-          className="font-display border-ink animate-fade-in w-full border-b-2 px-2 text-center leading-[0.92] font-normal tracking-tight uppercase select-none"
+          className="font-display border-ink animate-fade-in pointer-events-none w-full border-b-2 px-2 text-center leading-[0.92] font-normal tracking-tight uppercase select-none"
           style={{ fontSize: 'clamp(3rem, 12.5vw, 13.5rem)' }}
         >
           Made with Fable
