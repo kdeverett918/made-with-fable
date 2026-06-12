@@ -1,8 +1,11 @@
 # Made with Fable — Meta Ads Kit
 
-Campaign goal: traffic → submissions. Destination: https://made-with-fable.onrender.com/submit
+Campaign goal: traffic → submissions. Destination: https://madewithfable.com/submit
 (Send ad traffic to `/submit` or `/?utm_...` — test both. Submit converts harder but the
 gallery home is a softer landing for cold audiences.)
+
+> The domain madewithfable.com must be registered and pointed at the Render service
+> (custom domain + DNS) before these ads go live — all creative prints that URL.
 
 Suggested UTM template: `?utm_source=meta&utm_medium=paid&utm_campaign=launch&utm_content={ad-name}`
 
@@ -62,9 +65,13 @@ Suggested UTM template: `?utm_source=meta&utm_medium=paid&utm_campaign=launch&ut
 | `fable-ad-square-1080.mp4` | 1:1 video, 15s | Feed |
 | `fable-ad-story-1080x1920.mp4` | 9:16 video, 15s | Stories / Reels |
 
-Video beat sheet (15s): You made something with AI → Don't let it die in a chat log →
-You upload your creations / WE DRIVE THE TRAFFIC → real site footage pinned to the board →
-MADE WITH FABLE / Submit a project →
+Image style: surreal-miniature editorial poster — tiny figurine on a floor of collaged
+project pages, huge black grotesk type, red mono microtext (style ref in `images/`).
+
+Video beat sheet (15s): surreal MADE WITH FABLE poster push-in → You upload your creations /
+WE DRIVE THE TRAFFIC → upload-process collage from the real submit wizard (01 Tell us what
+you made → 02 Pin your media → 03 Submit for review → 04 Live on the board) →
+MADE WITH FABLE / Submit a project → madewithfable.com
 
 Video source: `ad-video/` (Remotion). Re-render: `cd ad-video && npx remotion render AdSquare out.mp4`.
 Edit copy beats in `ad-video/src/Ad.tsx`.

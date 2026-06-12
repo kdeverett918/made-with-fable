@@ -18,7 +18,8 @@ const anton = loadAnton('normal', {weights: ['400'], subsets: ['latin']});
 const archivo = loadArchivo('normal', {weights: ['400', '700'], subsets: ['latin']});
 const mono = loadJetBrainsMono('normal', {weights: ['400', '700'], subsets: ['latin']});
 
-const PAPER = '#EDEAE1';
+// matches the site's --color-background: oklch(0.94 0.011 86)
+const PAPER = '#EDECE6';
 const INK = '#141310';
 const RED = '#D1232A';
 
@@ -46,7 +47,6 @@ const Frame: React.FC<{color?: string}> = ({color = INK}) => {
   );
 };
 
-// one slab headline line, revealed with the site's slide-up + clip animation
 const SlabLine: React.FC<{
   text: string;
   delay: number;
@@ -99,6 +99,7 @@ const MonoLabel: React.FC<{
         textTransform: 'uppercase',
         color,
         opacity,
+        textAlign: 'center',
       }}
     >
       {text}
@@ -119,163 +120,116 @@ const RedPin: React.FC<{size: number}> = ({size}) => (
   />
 );
 
-// screenshot pinned to the board with the site's pin-drop spring
-const PinnedCard: React.FC<{
-  src: string;
-  width: number;
-  tilt: number;
-  delay: number;
-}> = ({src, width, tilt, delay}) => {
+// scene 1 — the surreal poster, slow push-in
+const SceneHero: React.FC = () => {
   const frame = useCurrentFrame();
-  const {fps, width: vw} = useVideoConfig();
-  const s = vw / 1080;
-  const drop = spring({frame: frame - delay, fps, config: {damping: 13, stiffness: 130}});
+  const {durationInFrames} = useVideoConfig();
+  const zoom = interpolate(frame, [0, durationInFrames], [1.04, 1.14], {
+    easing: Easing.linear,
+  });
   return (
-    <div
-      style={{
-        position: 'relative',
-        width,
-        opacity: frame < delay ? 0 : 1,
-        transform: `translateY(${(1 - drop) * -60 * s}px) rotate(${tilt}deg) scale(${0.92 + drop * 0.08})`,
-      }}
-    >
-      <div
+    <AbsoluteFill style={{background: PAPER, alignItems: 'center', justifyContent: 'center'}}>
+      <Img
+        src={staticFile('hero-poster.png')}
         style={{
-          border: `${3 * s}px solid ${INK}`,
-          boxShadow: `${8 * s}px ${8 * s}px 0 0 ${INK}`,
-          background: '#fff',
-          lineHeight: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain',
+          transform: `scale(${zoom})`,
         }}
-      >
-        <Img src={src} style={{width: '100%'}} />
-      </div>
-      <div
-        style={{
-          position: 'absolute',
-          top: -14 * s,
-          left: '50%',
-          transform: 'translateX(-50%)',
-        }}
-      >
-        <RedPin size={34 * s} />
-      </div>
-    </div>
-  );
-};
-
-const SceneHook: React.FC = () => {
-  const {width} = useVideoConfig();
-  const s = width / 1080;
-  return (
-    <AbsoluteFill
-      style={{
-        background: PAPER,
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 30 * s,
-      }}
-    >
-      <MonoLabel text="/ Fable community gallery /" size={22 * s} />
-      <div style={{textAlign: 'center'}}>
-        <SlabLine text="You made" delay={6} fontSize={170 * s} />
-        <SlabLine text="something" delay={12} fontSize={170 * s} />
-        <SlabLine text="with AI." delay={18} fontSize={170 * s} color={RED} />
-      </div>
-    </AbsoluteFill>
-  );
-};
-
-const SceneProblem: React.FC = () => {
-  const {width} = useVideoConfig();
-  const s = width / 1080;
-  return (
-    <AbsoluteFill
-      style={{background: INK, alignItems: 'center', justifyContent: 'center'}}
-    >
-      <div style={{textAlign: 'center'}}>
-        <SlabLine text="Don't let it" delay={2} fontSize={150 * s} color={PAPER} />
-        <SlabLine text="die in a" delay={8} fontSize={150 * s} color={PAPER} />
-        <SlabLine text="chat log." delay={14} fontSize={150 * s} color={RED} />
-      </div>
+      />
     </AbsoluteFill>
   );
 };
 
 const ScenePromise: React.FC = () => {
-  const frame = useCurrentFrame();
   const {width} = useVideoConfig();
   const s = width / 1080;
-  const barW = interpolate(frame, [34, 52], [0, 100], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: easeOutExpo,
-  });
   return (
     <AbsoluteFill
-      style={{
-        background: PAPER,
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 44 * s,
-      }}
+      style={{background: INK, alignItems: 'center', justifyContent: 'center', gap: 40 * s}}
     >
       <div style={{textAlign: 'center'}}>
-        <SlabLine text="You upload" delay={4} fontSize={130 * s} />
-        <SlabLine text="your creations." delay={10} fontSize={130 * s} />
+        <SlabLine text="You upload" delay={2} fontSize={140 * s} color={PAPER} />
+        <SlabLine text="your creations." delay={8} fontSize={140 * s} color={PAPER} />
       </div>
       <div style={{textAlign: 'center'}}>
-        <SlabLine text="We drive" delay={22} fontSize={170 * s} color={RED} />
-        <SlabLine text="the traffic." delay={28} fontSize={170 * s} color={RED} />
-        <div
-          style={{
-            height: 14 * s,
-            background: INK,
-            width: `${barW}%`,
-            marginTop: 18 * s,
-          }}
-        />
+        <SlabLine text="We drive" delay={20} fontSize={170 * s} color={RED} />
+        <SlabLine text="the traffic." delay={26} fontSize={170 * s} color={RED} />
       </div>
     </AbsoluteFill>
   );
 };
 
-const SceneProof: React.FC = () => {
-  const {width, height} = useVideoConfig();
+// one step of the upload-process collage
+const StepCard: React.FC<{
+  src: string;
+  step: string;
+  label: string;
+  tilt: number;
+}> = ({src, step, label, tilt}) => {
+  const frame = useCurrentFrame();
+  const {fps, width, height} = useVideoConfig();
   const s = width / 1080;
   const portrait = height > width;
+  const drop = spring({frame, fps, config: {damping: 13, stiffness: 130}});
+  const cardW = portrait ? width * 0.86 : width * 0.78;
   return (
     <AbsoluteFill
       style={{
         background: PAPER,
-        backgroundImage: `linear-gradient(90deg, rgba(20,19,16,0.08) 1px, transparent 1px), linear-gradient(rgba(20,19,16,0.08) 1px, transparent 1px)`,
+        backgroundImage: `linear-gradient(90deg, rgba(20,19,16,0.07) 1px, transparent 1px), linear-gradient(rgba(20,19,16,0.07) 1px, transparent 1px)`,
         backgroundSize: `${44 * s}px ${44 * s}px`,
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 40 * s,
+        gap: 36 * s,
       }}
     >
-      <MonoLabel text="Real projects. Real makers." size={24 * s} delay={0} />
       <div
         style={{
-          display: 'flex',
-          alignItems: portrait ? 'center' : 'flex-start',
-          flexDirection: portrait ? 'column' : 'row',
-          gap: 34 * s,
+          position: 'relative',
+          width: cardW,
+          transform: `translateY(${(1 - drop) * -70 * s}px) rotate(${tilt}deg) scale(${0.92 + drop * 0.08})`,
         }}
       >
-        <PinnedCard
-          src={staticFile('fable-home-desktop.png')}
-          width={portrait ? width * 0.78 : 640 * s}
-          tilt={-2.5}
-          delay={6}
-        />
-        <PinnedCard
-          src={staticFile('fable-home-mobile.png')}
-          width={portrait ? width * 0.34 : 240 * s}
-          tilt={3.5}
-          delay={16}
-        />
+        <div
+          style={{
+            border: `${3 * s}px solid ${INK}`,
+            boxShadow: `${9 * s}px ${9 * s}px 0 0 ${INK}`,
+            background: '#fff',
+            lineHeight: 0,
+          }}
+        >
+          <Img src={src} style={{width: '100%'}} />
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            top: -16 * s,
+            left: '50%',
+            transform: 'translateX(-50%)',
+          }}
+        >
+          <RedPin size={36 * s} />
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            top: -28 * s,
+            left: -22 * s,
+            background: RED,
+            color: PAPER,
+            fontFamily: anton.fontFamily,
+            fontSize: 46 * s,
+            padding: `${6 * s}px ${18 * s}px`,
+            boxShadow: `${5 * s}px ${5 * s}px 0 0 ${INK}`,
+            transform: 'rotate(-4deg)',
+          }}
+        >
+          {step}
+        </div>
       </div>
+      <MonoLabel text={label} delay={6} size={28 * s} />
     </AbsoluteFill>
   );
 };
@@ -284,27 +238,22 @@ const SceneCta: React.FC = () => {
   const frame = useCurrentFrame();
   const {fps, width} = useVideoConfig();
   const s = width / 1080;
-  const barIn = spring({frame: frame - 28, fps, config: {damping: 15, stiffness: 120}});
-  const pinDrop = spring({frame: frame - 20, fps, config: {damping: 12, stiffness: 140}});
+  const barIn = spring({frame: frame - 24, fps, config: {damping: 15, stiffness: 120}});
+  const pinDrop = spring({frame: frame - 16, fps, config: {damping: 12, stiffness: 140}});
   return (
     <AbsoluteFill
-      style={{
-        background: PAPER,
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 36 * s,
-      }}
+      style={{background: PAPER, alignItems: 'center', justifyContent: 'center', gap: 36 * s}}
     >
       <MonoLabel text="/ A community gallery /" size={22 * s} delay={2} />
       <div style={{textAlign: 'center', position: 'relative'}}>
-        <SlabLine text="Made" delay={6} fontSize={210 * s} />
-        <SlabLine text="with Fable" delay={12} fontSize={210 * s} />
+        <SlabLine text="Made" delay={4} fontSize={210 * s} />
+        <SlabLine text="with Fable" delay={10} fontSize={210 * s} />
         <div
           style={{
             position: 'absolute',
             top: -20 * s,
             right: -34 * s,
-            opacity: frame < 20 ? 0 : 1,
+            opacity: frame < 16 ? 0 : 1,
             transform: `translateY(${(1 - pinDrop) * -50 * s}px)`,
           }}
         >
@@ -322,13 +271,13 @@ const SceneCta: React.FC = () => {
           fontWeight: 700,
           padding: `${22 * s}px ${44 * s}px`,
           transform: `scale(${0.6 + barIn * 0.4})`,
-          opacity: frame < 28 ? 0 : 1,
+          opacity: frame < 24 ? 0 : 1,
           boxShadow: `${7 * s}px ${7 * s}px 0 0 ${RED}`,
         }}
       >
         Submit a project →
       </div>
-      <MonoLabel text="made-with-fable.onrender.com" size={22 * s} delay={40} />
+      <MonoLabel text="madewithfable.com" size={26 * s} delay={34} color={RED} />
     </AbsoluteFill>
   );
 };
@@ -336,19 +285,45 @@ const SceneCta: React.FC = () => {
 export const Ad: React.FC = () => {
   return (
     <AbsoluteFill style={{background: PAPER, fontFamily: archivo.fontFamily}}>
-      <Sequence durationInFrames={78}>
-        <SceneHook />
+      <Sequence durationInFrames={84}>
+        <SceneHero />
       </Sequence>
-      <Sequence from={78} durationInFrames={70}>
-        <SceneProblem />
-      </Sequence>
-      <Sequence from={148} durationInFrames={104}>
+      <Sequence from={84} durationInFrames={80}>
         <ScenePromise />
       </Sequence>
-      <Sequence from={252} durationInFrames={100}>
-        <SceneProof />
+      <Sequence from={164} durationInFrames={50}>
+        <StepCard
+          src={staticFile('step1-filled.png')}
+          step="01"
+          label="Tell us what you made"
+          tilt={-2}
+        />
       </Sequence>
-      <Sequence from={352}>
+      <Sequence from={214} durationInFrames={50}>
+        <StepCard
+          src={staticFile('step2-media.png')}
+          step="02"
+          label="Pin your media"
+          tilt={2.5}
+        />
+      </Sequence>
+      <Sequence from={264} durationInFrames={50}>
+        <StepCard
+          src={staticFile('step4-review.png')}
+          step="03"
+          label="Submit for review"
+          tilt={-2.5}
+        />
+      </Sequence>
+      <Sequence from={314} durationInFrames={52}>
+        <StepCard
+          src={staticFile('project-detail.png')}
+          step="04"
+          label="Live on the board — we drive the traffic"
+          tilt={2}
+        />
+      </Sequence>
+      <Sequence from={366}>
         <SceneCta />
       </Sequence>
       <Grain />
