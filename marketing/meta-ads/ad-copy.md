@@ -4,8 +4,8 @@ Campaign goal: traffic → submissions. Destination: https://madewithfable.com/s
 (Send ad traffic to `/submit` or `/?utm_...` — test both. Submit converts harder but the
 gallery home is a softer landing for cold audiences.)
 
-> The domain madewithfable.com must be registered and pointed at the Render service
-> (custom domain + DNS) before these ads go live — all creative prints that URL.
+> madewithfable.com is live (custom domain on Render; Supabase auth + NEXT_PUBLIC_SITE_URL
+> updated 2026-06-12). Remaining pre-spend item: Meta Pixel / Conversions API.
 
 Suggested UTM template: `?utm_source=meta&utm_medium=paid&utm_campaign=launch&utm_content={ad-name}`
 

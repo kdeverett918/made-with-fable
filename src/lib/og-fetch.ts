@@ -112,7 +112,7 @@ async function safeFetch(raw: string, accept: string): Promise<Response> {
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
       headers: {
         accept,
-        'user-agent': 'MadeWithFableBot/1.0 (+https://made-with-fable.onrender.com)',
+        'user-agent': 'MadeWithFableBot/1.0 (+https://madewithfable.com)',
       },
     })
     if (res.status >= 300 && res.status < 400) {
