@@ -1,7 +1,6 @@
 import 'server-only'
 import { lookup } from 'node:dns/promises'
 import { isIP } from 'node:net'
-import sharp from 'sharp'
 
 const FETCH_TIMEOUT_MS = 5000
 const MAX_REDIRECTS = 3
@@ -203,6 +202,9 @@ export async function downloadOgImage(imageUrl: string): Promise<OgImage | null>
     const raw = await readCapped(res, MAX_IMAGE_BYTES)
     if (raw.byteLength === 0) return null
 
+    // lazy import: a broken sharp native module must degrade to "no preview
+    // image", never crash the submission path
+    const { default: sharp } = await import('sharp')
     const image = sharp(raw).resize({ width: 1200, withoutEnlargement: true })
     const buffer = await image.webp({ quality: 80 }).toBuffer()
     const meta = await sharp(buffer).metadata()

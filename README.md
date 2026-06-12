@@ -36,6 +36,19 @@ Env vars (see `.env.example`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE
 - Google sign-in must be enabled in Supabase Auth > Sign In / Providers > Google with a Google
   OAuth client ID and secret. The Google OAuth app also needs the Supabase provider callback URL
   as an authorized redirect URI.
+- Supabase OAuth/OIDC server is enabled with `/oauth/consent` as the authorization UI path.
+  Public client for smoke tests and first-party integrations:
+  `b0b125e6-d05e-4e70-84b2-592c1976e50c`.
+
+OAuth/OIDC endpoints:
+
+```text
+Authorization: https://hzmqftoaolwjlmibomou.supabase.co/auth/v1/oauth/authorize
+Token:         https://hzmqftoaolwjlmibomou.supabase.co/auth/v1/oauth/token
+JWKS:          https://hzmqftoaolwjlmibomou.supabase.co/auth/v1/.well-known/jwks.json
+OIDC config:   https://hzmqftoaolwjlmibomou.supabase.co/auth/v1/.well-known/openid-configuration
+OAuth config:  https://hzmqftoaolwjlmibomou.supabase.co/.well-known/oauth-authorization-server/auth/v1
+```
 
 ## Seed real showcase posts
 

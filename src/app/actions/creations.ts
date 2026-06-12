@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { fetchOgPreview, downloadOgImage } from '@/lib/og-fetch'
 import { fetchRecentCounts, RATE_LIMITS } from '@/lib/rate-limit'
+import { notifyAdminOfSubmission } from '@/lib/email'
 
 const mediaItemSchema = z.object({
   kind: z.enum(['image', 'video']),
@@ -152,6 +153,17 @@ export async function createCreation(input: CreateCreationInput): Promise<Create
         .insert(tagRows.map((t) => ({ creation_id: creation.id, tag_id: t.id })))
     }
   }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('username')
+    .eq('id', user.id)
+    .single()
+  await notifyAdminOfSubmission({
+    title: data.title,
+    username: profile?.username ?? 'unknown',
+    creationId: creation.id,
+  })
 
   revalidatePath('/')
   return { ok: true, id: creation.id }

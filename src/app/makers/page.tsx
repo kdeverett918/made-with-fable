@@ -23,14 +23,14 @@ export default async function MakersPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const [profilesRes, creationRows, followsRes] = await Promise.all([
+  const [profilesRes, countRows, followsRes] = await Promise.all([
     supabase
       .from('profiles')
       .select('*')
       .order('follower_count', { ascending: false })
       .order('created_at', { ascending: true })
       .limit(200),
-    supabase.from('creations').select('author_id').eq('status', 'approved'),
+    supabase.rpc('approved_counts_by_author'),
     user
       ? supabase.from('follows').select('followee_id').eq('follower_id', user.id)
       : Promise.resolve({ data: null }),
@@ -38,8 +38,11 @@ export default async function MakersPage() {
 
   const profiles = (profilesRes.data ?? []) as Profile[]
   const projectCounts = new Map<string, number>()
-  for (const row of creationRows.data ?? []) {
-    projectCounts.set(row.author_id, (projectCounts.get(row.author_id) ?? 0) + 1)
+  for (const row of (countRows.data ?? []) as Array<{
+    author_id: string
+    project_count: number
+  }>) {
+    projectCounts.set(row.author_id, Number(row.project_count))
   }
   const followedIds = new Set((followsRes.data ?? []).map((f) => f.followee_id))
 
