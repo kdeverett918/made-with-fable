@@ -1,0 +1,25 @@
+# Supabase project config — applied with `supabase config push` (project hzmqftoaolwjlmibomou).
+project_id = "made-with-fable"
+
+[auth]
+site_url = "https://made-with-fable.onrender.com"
+additional_redirect_urls = [
+  "https://made-with-fable.onrender.com/**",
+  "http://localhost:3000/**",
+  "http://localhost:3789/**",
+]
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+
+[auth.email.template.magic_link]
+subject = "Your door into Made with Fable"
+content_path = "./supabase/email-templates/magic-link.html"
+
+# Google OAuth — fill env vars before `supabase config push`:
+#   SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID / _SECRET
+[auth.external.google]
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"

@@ -12,20 +12,10 @@ import type { FeedItem } from '@/types/database'
  * cards without measuring the DOM. Keep in sync with the render below.
  */
 export function estimateCardHeight(item: FeedItem, columnWidth: number): number {
+  // every card is the same box: fixed 4:3 media area + fixed chrome,
+  // so the board reads as an even pinned grid
   const chrome = 148 // pin allowance + title strip + footer strip
-  if (item.media_width && item.media_height) {
-    return columnWidth * (item.media_height / item.media_width) + chrome
-  }
-  if (item.og_image_width && item.og_image_height) {
-    return columnWidth * (item.og_image_height / item.og_image_width) + chrome
-  }
-  if (item.media_path || item.og_image_path) return columnWidth * 0.75 + chrome
-  if (item.live_url) return 128 + chrome
-  if (item.prompt_excerpt) {
-    const lines = Math.ceil(Math.min(item.prompt_excerpt.length, 280) / 34)
-    return 52 + lines * 18 + chrome
-  }
-  return 96 + chrome
+  return columnWidth * 0.75 + chrome
 }
 
 const countFormatter = new Intl.NumberFormat('en', {
@@ -90,13 +80,8 @@ export function CreationCard({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
 
-  const aspect =
-    item.media_width && item.media_height
-      ? `${item.media_width} / ${item.media_height}`
-      : item.og_image_width && item.og_image_height
-        ? `${item.og_image_width} / ${item.og_image_height}`
-        : undefined
-  const mediaAspect = aspect ?? '4 / 3'
+  // uniform boxes: every media area is cropped to 4:3 regardless of native size
+  const mediaAspect = '4 / 3'
   const pinTilt = ((index % 5) - 2) * 4
   const cardNumber = String(index + 1).padStart(2, '0')
 
@@ -125,7 +110,7 @@ export function CreationCard({
               {cardNumber}
             </span>
           </div>
-          <h3 className="line-clamp-2 text-base leading-[0.98] font-black tracking-wide break-words uppercase">
+          <h3 className="line-clamp-2 min-h-[2lh] text-base leading-[0.98] font-black tracking-wide break-words uppercase">
             {item.title}
           </h3>
           <p className="label-mono text-muted mt-2 truncate">by @{item.author_username}</p>
@@ -186,21 +171,30 @@ export function CreationCard({
             )}
           </div>
         ) : item.live_url ? (
-          <div className="border-ink bg-surface-raised flex h-32 flex-col items-center justify-center gap-3 border-b-2 px-4">
+          <div
+            className="border-ink bg-surface-raised flex flex-col items-center justify-center gap-3 border-b-2 px-4"
+            style={{ aspectRatio: mediaAspect }}
+          >
             <Globe className="text-accent h-6 w-6" aria-hidden />
             <span className="label-mono text-ink max-w-full text-center break-all">
               {domainOf(item.live_url)}
             </span>
           </div>
         ) : item.prompt_excerpt ? (
-          <div className="border-ink bg-surface-raised border-b-2 p-3">
+          <div
+            className="border-ink bg-surface-raised overflow-hidden border-b-2 p-3"
+            style={{ aspectRatio: mediaAspect }}
+          >
             <p className="label-mono text-accent mb-2 font-bold">&gt;_ prompt</p>
             <p className="text-muted line-clamp-6 font-mono text-xs leading-relaxed break-words">
               {item.prompt_excerpt}
             </p>
           </div>
         ) : (
-          <div className="border-ink bg-surface-raised h-24 border-b-2" />
+          <div
+            className="border-ink bg-surface-raised border-b-2"
+            style={{ aspectRatio: mediaAspect }}
+          />
         )}
 
         {/* footer strip */}

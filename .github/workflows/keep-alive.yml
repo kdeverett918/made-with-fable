@@ -1,0 +1,16 @@
+name: keep-alive
+
+on:
+  schedule:
+    # every 10 minutes — keeps the free Render instance warm and Supabase active
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping feed (touches app + database)
+        run: |
+          curl -sS -o /dev/null -w "feed: %{http_code} in %{time_total}s\n" \
+            --max-time 90 "https://made-with-fable.onrender.com/api/feed"
