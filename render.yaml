@@ -8,7 +8,7 @@ services:
     branch: main
     # npm install (not ci): npm's lockfile bug skips wasm32-side optional deps
     # (@emnapi/*) when the lock is generated on Windows, which breaks npm ci on linux
-    buildCommand: npm install && npm run build && cp -r .next/static .next/standalone/.next/static && cp -r public .next/standalone/public
+    buildCommand: npm install --include=dev && npm run build && cp -r .next/static .next/standalone/.next/static && cp -r public .next/standalone/public
     startCommand: HOSTNAME=0.0.0.0 node .next/standalone/server.js
     healthCheckPath: /api/health
     envVars:
