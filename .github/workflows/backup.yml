@@ -1,0 +1,45 @@
+name: db-backup
+
+on:
+  schedule:
+    # weekly, Sunday 09:00 UTC
+    - cron: '0 9 * * 0'
+  workflow_dispatch:
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install postgresql-client 17
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] \
+            http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17
+
+      - name: Dump, compress, encrypt
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          /usr/lib/postgresql/17/bin/pg_dump "$DB_URL" \
+            --no-owner --no-privileges --schema=public --schema=auth \
+            | gzip \
+            | openssl enc -aes-256-cbc -pbkdf2 -salt -pass env:PASSPHRASE \
+            > backup.sql.gz.enc
+          ls -la backup.sql.gz.enc
+
+      # repo is public — the dump is AES-encrypted with BACKUP_PASSPHRASE
+      # (also in .env.local locally). Decrypt with:
+      #   openssl enc -d -aes-256-cbc -pbkdf2 -pass pass:<passphrase> \
+      #     -in backup.sql.gz.enc | gunzip > backup.sql
+      - name: Upload encrypted dump (90-day retention)
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: backup.sql.gz.enc
+          retention-days: 90
