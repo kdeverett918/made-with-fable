@@ -1,9 +1,8 @@
 import Link from 'next/link'
-import { Plus, Sparkles } from 'lucide-react'
+import { Asterisk } from 'lucide-react'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
-import { Container } from '@/components/layout/container'
 import { AuthMenu } from '@/components/layout/auth-menu'
-import { buttonVariants } from '@/components/ui/button'
+import { NavLinks } from '@/components/layout/nav-links'
 import type { Profile } from '@/types/database'
 
 export async function Header() {
@@ -19,24 +18,31 @@ export async function Header() {
   }
 
   return (
-    <header className="border-border bg-background/80 sticky top-0 z-40 border-b backdrop-blur-md">
-      <Container className="flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2">
-          <Sparkles className="text-accent h-5 w-5" aria-hidden />
-          <span className="font-display text-lg font-semibold tracking-tight">
-            Made with <span className="text-accent">Fable</span>
-          </span>
+    <header className="border-ink bg-background sticky top-0 z-40 border-b-2">
+      <div className="flex items-stretch">
+        <Link
+          href="/"
+          className="label-mono hover:bg-ink hover:text-background flex items-center gap-2 px-4 py-3 font-bold transition-colors"
+        >
+          <Asterisk className="text-accent h-4 w-4" aria-hidden />
+          Fable Community
         </Link>
-
-        <div className="flex items-center gap-3">
-          <Link href="/submit" className={buttonVariants({ variant: 'primary', size: 'sm' })}>
-            <Plus className="h-4 w-4" aria-hidden />
-            <span className="hidden sm:inline">Share your creation</span>
-            <span className="sm:hidden">Share</span>
+        <nav className="border-ink hidden items-stretch border-l-2 sm:flex" aria-label="Main">
+          <NavLinks />
+        </nav>
+        <div className="border-ink ml-auto flex items-center gap-3 border-l-2 py-2 pr-4 pl-4">
+          <Link
+            href="/submit"
+            className="label-mono bg-accent text-on-accent hover:bg-accent-deep hidden px-3 py-1.5 font-bold transition-colors sm:inline-block"
+          >
+            Submit a project →
           </Link>
           <AuthMenu profile={profile} />
         </div>
-      </Container>
+      </div>
+      <nav className="border-ink flex items-stretch border-t-2 sm:hidden" aria-label="Main">
+        <NavLinks variant="mobile" />
+      </nav>
     </header>
   )
 }

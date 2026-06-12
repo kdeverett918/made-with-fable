@@ -44,25 +44,43 @@ export function ProfileForm({ profile, userId }: { profile: Profile; userId: str
   }
 
   return (
-    <form action={formAction} className="mt-8 space-y-6">
+    <form
+      action={formAction}
+      className="border-ink bg-background mt-10 border-2 shadow-[6px_6px_0_0_var(--color-ink)]"
+    >
       <input type="hidden" name="avatar_url" value={avatarUrl} />
 
-      <div className="flex items-center gap-4">
-        <Avatar src={avatarUrl || null} name={profile.display_name ?? profile.username} size={72} />
-        <div>
+      <div className="grid md:grid-cols-[260px_minmax(0,1fr)]">
+        <section className="border-ink border-b-2 p-5 sm:p-6 md:border-r-2 md:border-b-0">
+          <p className="label-mono text-muted-foreground">Avatar block</p>
+          <div className="mt-5 flex items-end gap-4 md:block">
+            <Avatar
+              src={avatarUrl || null}
+              name={profile.display_name ?? profile.username}
+              size={112}
+              className="bg-background"
+            />
+            <div className="min-w-0 md:mt-5">
+              <p className="truncate text-sm font-bold tracking-wide uppercase">
+                {profile.display_name || profile.username}
+              </p>
+              <p className="label-mono text-muted-foreground mt-1">@{profile.username}</p>
+            </div>
+          </div>
           <Button
             type="button"
             variant="secondary"
             size="sm"
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
+            className="mt-5 w-full justify-between"
           >
+            Change photo
             {uploading ? (
               <Spinner className="h-4 w-4" />
             ) : (
               <Camera className="h-4 w-4" aria-hidden />
             )}
-            Change photo
           </Button>
           <input
             ref={fileRef}
@@ -71,47 +89,69 @@ export function ProfileForm({ profile, userId }: { profile: Profile; userId: str
             className="hidden"
             onChange={onAvatarPick}
           />
-        </div>
+          <p className="label-mono text-muted-foreground mt-4">WebP upload, 512px max.</p>
+        </section>
+
+        <section className="space-y-5 p-5 sm:p-6">
+          <div className="grid gap-5 sm:grid-cols-2">
+            <label className="block">
+              <span className="label-mono mb-2 block font-bold">Username</span>
+              <Input
+                name="username"
+                defaultValue={profile.username}
+                required
+                pattern="[a-z0-9_]{3,24}"
+                title="3-24 lowercase letters, numbers, or underscores"
+                className="h-12"
+              />
+            </label>
+
+            <label className="block">
+              <span className="label-mono mb-2 block font-bold">Display name</span>
+              <Input
+                name="display_name"
+                defaultValue={profile.display_name ?? ''}
+                maxLength={60}
+                className="h-12"
+              />
+            </label>
+          </div>
+
+          <label className="block">
+            <span className="label-mono mb-2 block font-bold">Bio</span>
+            <Textarea name="bio" defaultValue={profile.bio ?? ''} maxLength={280} rows={4} />
+          </label>
+
+          <label className="block">
+            <span className="label-mono mb-2 block font-bold">Website</span>
+            <Input
+              name="website_url"
+              type="url"
+              placeholder="https://"
+              defaultValue={profile.website_url ?? ''}
+              className="h-12"
+            />
+          </label>
+
+          {state.error && (
+            <p className="label-mono border-accent text-accent border-2 px-3 py-2" role="alert">
+              {state.error}
+            </p>
+          )}
+          {state.ok && !pending && (
+            <p className="label-mono border-success text-success border-2 px-3 py-2" role="status">
+              Saved.
+            </p>
+          )}
+        </section>
       </div>
 
-      <label className="block">
-        <span className="mb-1.5 block text-sm font-medium">Username</span>
-        <Input
-          name="username"
-          defaultValue={profile.username}
-          required
-          pattern="[a-z0-9_]{3,24}"
-          title="3–24 lowercase letters, numbers, or underscores"
-        />
-      </label>
-
-      <label className="block">
-        <span className="mb-1.5 block text-sm font-medium">Display name</span>
-        <Input name="display_name" defaultValue={profile.display_name ?? ''} maxLength={60} />
-      </label>
-
-      <label className="block">
-        <span className="mb-1.5 block text-sm font-medium">Bio</span>
-        <Textarea name="bio" defaultValue={profile.bio ?? ''} maxLength={280} rows={3} />
-      </label>
-
-      <label className="block">
-        <span className="mb-1.5 block text-sm font-medium">Website</span>
-        <Input
-          name="website_url"
-          type="url"
-          placeholder="https://"
-          defaultValue={profile.website_url ?? ''}
-        />
-      </label>
-
-      {state.error && <p className="text-error text-sm">{state.error}</p>}
-      {state.ok && !pending && <p className="text-success text-sm">Saved.</p>}
-
-      <Button type="submit" disabled={pending || uploading}>
-        {pending ? <Spinner className="text-on-accent h-4 w-4" /> : null}
-        Save profile
-      </Button>
+      <div className="border-ink bg-surface-raised flex justify-end border-t-2 px-5 py-4 sm:px-6">
+        <Button type="submit" disabled={pending || uploading}>
+          {pending ? <Spinner className="text-on-accent h-4 w-4" /> : null}
+          Save profile
+        </Button>
+      </div>
     </form>
   )
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { fetchFeedPage, type FeedSort } from '@/lib/feed'
+import { fetchFeedPage, fetchFollowedAuthorIds, type FeedSort } from '@/lib/feed'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -7,9 +7,15 @@ export async function GET(request: Request) {
   const category = searchParams.get('category')
   const tag = searchParams.get('tag')
   const cursor = searchParams.get('cursor')
+  const following = searchParams.get('feed') === 'following'
 
-  const page = await fetchFeedPage({ sort, category, tag, cursor })
+  // the followed-author list is derived from the session, never from the client
+  const authors = following ? ((await fetchFollowedAuthorIds()) ?? []) : null
+
+  const page = await fetchFeedPage({ sort, category, tag, cursor, authors })
   return NextResponse.json(page, {
-    headers: { 'cache-control': 'public, max-age=15, stale-while-revalidate=60' },
+    headers: following
+      ? { 'cache-control': 'private, no-store' }
+      : { 'cache-control': 'public, max-age=15, stale-while-revalidate=60' },
   })
 }

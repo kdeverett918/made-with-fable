@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Your Fable trapdoor is open</title>
+  </head>
+  <body style="margin:0;background:#f2eee6;color:#12110f;font-family:Arial,Helvetica,sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f2eee6;">
+      <tr>
+        <td align="center" style="padding:28px 16px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;border:2px solid #12110f;background:#fffaf0;">
+            <tr>
+              <td style="border-bottom:2px solid #12110f;padding:16px 20px;font-family:'Courier New',Courier,monospace;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">
+                * Made with Fable
+              </td>
+              <td align="right" style="border-bottom:2px solid #12110f;border-left:2px solid #12110f;padding:16px 20px;font-family:'Courier New',Courier,monospace;font-size:12px;font-weight:700;color:#d71920;text-transform:uppercase;">
+                Access pass
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2" style="padding:32px 24px 12px;">
+                <p style="margin:0 0 10px;font-family:'Courier New',Courier,monospace;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#d71920;">
+                  The velvet rope got bored.
+                </p>
+                <h1 style="margin:0;font-size:54px;line-height:.88;font-weight:900;letter-spacing:-.03em;text-transform:uppercase;">
+                  You are on the list.
+                </h1>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2" style="padding:10px 24px 24px;">
+                <p style="margin:0;font-size:16px;line-height:1.55;">
+                  Click the button to sign in. No password. No secret handshake. Just a small internet door with your name taped to it.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2" style="padding:0 24px 30px;">
+                <a href="{{ .ConfirmationURL }}" style="display:block;background:#d71920;color:#fffaf0;border:2px solid #12110f;padding:16px 18px;text-align:center;font-family:'Courier New',Courier,monospace;font-size:14px;font-weight:700;letter-spacing:.08em;text-decoration:none;text-transform:uppercase;">
+                  Open the board
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2" style="border-top:2px solid #12110f;padding:18px 24px;font-family:'Courier New',Courier,monospace;font-size:12px;line-height:1.55;color:#5f5a52;">
+                If the button plays hard to get, paste this into your browser:<br />
+                <a href="{{ .ConfirmationURL }}" style="color:#d71920;word-break:break-all;">{{ .ConfirmationURL }}</a>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2" style="border-top:2px solid #12110f;padding:14px 24px;font-family:'Courier New',Courier,monospace;font-size:11px;line-height:1.5;color:#5f5a52;text-transform:uppercase;">
+                Ignore this if you did not ask to enter Made with Fable. Someone probably mistyped. Happens in the finest institutions.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

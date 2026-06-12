@@ -23,7 +23,10 @@ export function AuthMenu({ profile }: { profile: Profile | null }) {
 
   if (!profile) {
     return (
-      <Link href="/login" className="text-muted hover:text-foreground text-sm font-medium">
+      <Link
+        href="/login"
+        className="label-mono text-muted hover:text-ink -mx-3 -my-2 flex min-h-11 items-center px-3 py-2 font-bold hover:underline"
+      >
         Sign in
       </Link>
     )
@@ -37,7 +40,7 @@ export function AuthMenu({ profile }: { profile: Profile | null }) {
   }
 
   const itemClass =
-    'flex w-full items-center gap-2 px-3 py-2 text-sm text-muted hover:text-foreground hover:bg-surface-raised transition-colors'
+    'label-mono flex w-full items-center gap-2 px-3 py-2 text-muted hover:bg-ink hover:text-background transition-colors'
 
   return (
     <div className="relative" ref={menuRef}>
@@ -46,7 +49,7 @@ export function AuthMenu({ profile }: { profile: Profile | null }) {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Account menu"
-        className="focus-visible:outline-ring cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-offset-2"
+        className="focus-visible:outline-ring flex cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2"
       >
         <Avatar
           src={profile.avatar_url}
@@ -58,7 +61,7 @@ export function AuthMenu({ profile }: { profile: Profile | null }) {
       {open && (
         <div
           role="menu"
-          className="border-border bg-surface animate-scale-in absolute right-0 mt-2 w-48 overflow-hidden rounded-lg border py-1 shadow-xl"
+          className="border-ink bg-background animate-scale-in absolute right-0 mt-2 w-48 overflow-hidden border-2 py-1 shadow-[4px_4px_0_0_var(--color-ink)]"
         >
           <Link
             href={`/u/${profile.username}`}

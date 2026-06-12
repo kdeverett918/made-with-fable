@@ -1,60 +1,38 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { CreationCard, estimateCardHeight } from '@/components/feed/creation-card'
+import { CreationCard } from '@/components/feed/creation-card'
 import type { FeedItem } from '@/types/database'
 
-const BREAKPOINTS: Array<{ minWidth: number; columns: number }> = [
-  { minWidth: 1280, columns: 5 },
-  { minWidth: 1024, columns: 4 },
-  { minWidth: 640, columns: 3 },
-  { minWidth: 0, columns: 2 },
-]
-
-function columnsForWidth(width: number) {
-  return BREAKPOINTS.find((b) => width >= b.minWidth)?.columns ?? 2
-}
-
-function useColumnCount() {
-  const [columns, setColumns] = useState(4)
-  useEffect(() => {
-    const update = () => setColumns(columnsForWidth(window.innerWidth))
-    update()
-    window.addEventListener('resize', update)
-    return () => window.removeEventListener('resize', update)
-  }, [])
-  return columns
-}
-
 /**
- * Shortest-column masonry. Heights come from stored media dimensions, so no
- * DOM measurement is needed and appended pages never reshuffle earlier items.
+ * Pinned board layout. CSS grid avoids a hydration-only layout pass, so the
+ * board paints as a full editorial wall even before client JavaScript settles.
  */
 export function MasonryGrid({ items }: { items: FeedItem[] }) {
-  const columnCount = useColumnCount()
-
-  const columns: FeedItem[][] = Array.from({ length: columnCount }, () => [])
-  const heights = new Array<number>(columnCount).fill(0)
-  const columnWidth = 280 // estimate only — relative ratios are what matter
-
-  for (const item of items) {
-    let shortest = 0
-    for (let i = 1; i < columnCount; i++) {
-      if (heights[i] < heights[shortest]) shortest = i
-    }
-    columns[shortest].push(item)
-    heights[shortest] += estimateCardHeight(item, columnWidth) + 16
-  }
-
   return (
-    <div className="flex gap-4">
-      {columns.map((column, colIndex) => (
-        <div key={colIndex} className="flex min-w-0 flex-1 flex-col gap-4">
-          {column.map((item, i) => (
-            <CreationCard key={item.id} item={item} priority={colIndex < 4 && i === 0} />
-          ))}
-        </div>
-      ))}
-    </div>
+    <section
+      aria-label="Pinned project board"
+      className="border-ink bg-surface relative isolate w-full max-w-full min-w-0 overflow-x-clip border-2 p-2 pb-4 sm:p-3 sm:pb-5"
+    >
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage:
+            'linear-gradient(to right, var(--color-ink) 1px, transparent 1px), linear-gradient(to bottom, var(--color-ink) 1px, transparent 1px)',
+          backgroundSize: '44px 44px',
+        }}
+        aria-hidden
+      />
+      <div className="border-ink bg-background relative mb-3 flex items-center justify-between border-2">
+        <p className="label-mono text-ink px-3 py-2 font-bold">Pinned board</p>
+        <p className="label-mono text-accent border-ink border-l-2 px-3 py-2 font-bold tabular-nums">
+          {items.length} work{items.length === 1 ? '' : 's'}
+        </p>
+      </div>
+      <div className="relative grid min-w-0 grid-cols-1 items-start gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 2xl:grid-cols-4">
+        {items.map((item, index) => (
+          <CreationCard key={item.id} item={item} index={index} preload={index < 8} />
+        ))}
+      </div>
+    </section>
   )
 }

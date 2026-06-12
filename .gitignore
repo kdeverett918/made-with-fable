@@ -41,3 +41,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .playwright-mcp/
+
+# one-time seed media (already uploaded to Supabase storage; ~14MB)
+/seed-assets/

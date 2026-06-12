@@ -12,49 +12,89 @@ export default function AboutPage() {
     <>
       <Header />
       <main id="main" className="py-12">
-        <Container className="prose-custom max-w-2xl">
-          <h1 className="font-display text-3xl font-semibold">About Made with Fable</h1>
+        <Container className="max-w-2xl">
+          <p className="label-mono text-accent">* Made with Fable</p>
+          <h1 className="font-display mt-2 text-6xl leading-none tracking-tight uppercase">
+            About
+          </h1>
 
-          <div className="text-muted mt-6 space-y-4 text-[15px] leading-relaxed">
-            <p>
+          <div className="border-ink mt-6 space-y-4 border-2 p-5 text-[15px] leading-relaxed sm:p-6">
+            <p className="text-ink">
               Claude Fable 5 is here for a limited time — and people are building remarkable things
               with it. This gallery is a community space to show off those creations: websites,
               games, art, tools, agents, writing, music, and everything in between.
             </p>
-            <p>
-              Every submission can include the prompt behind it, so the gallery doubles as a library
-              of ideas. See something inspiring? Copy the prompt and remix it.
+            <p className="text-muted">
+              Every approved project can include the prompt behind it, so the gallery doubles as a
+              library of ideas. See something inspiring? Copy the prompt and remix it.
             </p>
-            <p className="text-muted-foreground text-sm">
-              This is an independent community project, not affiliated with Anthropic.
+            <p className="label-mono text-muted-foreground">
+              An independent community project, not affiliated with Anthropic.
             </p>
           </div>
 
-          <h2 className="font-display mt-10 text-xl font-semibold">Submission guidelines</h2>
-          <ul className="text-muted mt-4 list-disc space-y-2 pl-5 text-[15px]">
-            <li>
-              Share things you made with Fable (Claude Fable 5) — that&apos;s the whole point.
-            </li>
-            <li>You must own or have rights to what you upload.</li>
-            <li>Keep it safe for work. No hateful, violent, or sexual content.</li>
-            <li>No spam, ads, or low-effort reposts of other people&apos;s work.</li>
-            <li>Include the prompt and story when you can — it&apos;s what makes this useful.</li>
-            <li>Submissions are reviewed by a human before they appear, usually within a day.</li>
-          </ul>
+          <h2 className="font-display mt-12 text-3xl leading-none tracking-tight uppercase">
+            Submission guidelines
+          </h2>
+          <ol className="border-ink divide-ink mt-4 divide-y-2 border-2">
+            {[
+              'Submit things you made with Fable (Claude Fable 5) — that’s the whole point.',
+              'You must own or have rights to what you upload.',
+              'Keep it safe for work. No hateful, violent, or sexual content.',
+              'No spam, ads, or low-effort reposts of other people’s work.',
+              'Include the prompt and story when you can — it’s what makes this useful.',
+              'Submissions are reviewed by a human before they appear, usually within a day.',
+            ].map((text, i) => (
+              <li key={i} className="flex gap-4 px-4 py-3">
+                <span className="label-mono text-accent shrink-0 font-bold">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span className="text-muted text-[15px]">{text}</span>
+              </li>
+            ))}
+          </ol>
 
-          <h2 className="font-display mt-10 text-xl font-semibold">Privacy, briefly</h2>
-          <ul className="text-muted mt-4 list-disc space-y-2 pl-5 text-[15px]">
-            <li>We store your email (for sign-in), profile, and what you submit. Nothing else.</li>
-            <li>No ads, no tracking pixels, no selling data.</li>
-            <li>
-              Want your account or a submission gone? Use the report button or contact the site
-              owner, and it will be removed.
+          <h2 className="font-display mt-12 text-3xl leading-none tracking-tight uppercase">
+            Privacy, briefly
+          </h2>
+          <ol className="border-ink divide-ink mt-4 divide-y-2 border-2">
+            {[
+              'We store your email (for sign-in), profile, and what you submit. Nothing else.',
+              'No ads, no tracking pixels, no selling data.',
+              'Want your account or a project gone? Use the report button or contact the site owner, and it will be removed.',
+            ].map((text, i) => (
+              <li key={i} className="flex gap-4 px-4 py-3">
+                <span className="label-mono text-accent shrink-0 font-bold">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span className="text-muted text-[15px]">{text}</span>
+              </li>
+            ))}
+            <li className="flex gap-4 px-4 py-3">
+              <span className="label-mono text-accent shrink-0 font-bold">04</span>
+              <span className="text-muted text-[15px]">
+                Full details:{' '}
+                <Link
+                  href="/privacy"
+                  className="text-ink hover:text-accent font-bold underline underline-offset-2 transition-colors"
+                >
+                  privacy policy
+                </Link>{' '}
+                and{' '}
+                <Link
+                  href="/terms"
+                  className="text-ink hover:text-accent font-bold underline underline-offset-2 transition-colors"
+                >
+                  terms
+                </Link>
+                .
+              </span>
             </li>
-          </ul>
+          </ol>
 
-          <div className="mt-10">
+          <div className="mt-12">
             <Link href="/submit" className={buttonVariants({ size: 'lg' })}>
-              Share your creation
+              Submit your project
             </Link>
           </div>
         </Container>

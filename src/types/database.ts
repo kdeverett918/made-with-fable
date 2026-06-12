@@ -10,6 +10,8 @@ export interface Profile {
   bio: string | null
   website_url: string | null
   is_admin: boolean
+  follower_count: number
+  following_count: number
   created_at: string
   updated_at: string
 }

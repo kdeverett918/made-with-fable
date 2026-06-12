@@ -55,41 +55,76 @@ export default async function AdminPage({ searchParams }: PageProps) {
   }
 
   const tabs = [
-    { id: 'pending', label: `Pending (${pendingCount ?? 0})` },
-    { id: 'reports', label: `Reports (${openReports ?? 0})` },
-    { id: 'all', label: 'All content' },
+    { id: 'pending', label: 'Pending', count: pendingCount ?? 0 },
+    { id: 'reports', label: 'Reports', count: openReports ?? 0 },
+    { id: 'all', label: 'All content', count: null },
   ]
 
   return (
     <>
       <Header />
-      <main id="main" className="py-10">
-        <Container className="max-w-3xl">
-          <h1 className="font-display text-3xl font-semibold">Moderation</h1>
+      <main id="main" className="relative overflow-hidden py-8 sm:py-10 lg:py-12">
+        <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-[linear-gradient(to_right,var(--color-ink)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-ink)_1px,transparent_1px)] bg-[size:56px_56px] opacity-[0.04]" />
+        <Container className="max-w-6xl">
+          <section className="border-ink bg-background grid border-2 shadow-[8px_8px_0_0_var(--color-ink)] lg:grid-cols-[minmax(0,1fr)_360px]">
+            <div className="border-ink border-b-2 p-5 sm:p-7 lg:border-r-2 lg:border-b-0 lg:p-9">
+              <p className="label-mono text-accent mb-4 font-bold">Admin room / Live queue</p>
+              <h1 className="font-display text-[clamp(4.5rem,13vw,10rem)] leading-[0.82] tracking-tight uppercase">
+                Moderation
+              </h1>
+            </div>
+            <aside className="divide-ink grid grid-cols-2 divide-x-2 lg:grid-cols-1 lg:divide-x-0 lg:divide-y-2">
+              <div className="p-5 sm:p-6">
+                <p className="label-mono text-muted-foreground">Pending</p>
+                <p className="font-display text-accent mt-2 text-6xl leading-none">
+                  {pendingCount ?? 0}
+                </p>
+              </div>
+              <div className="p-5 sm:p-6">
+                <p className="label-mono text-muted-foreground">Reports</p>
+                <p className="font-display mt-2 text-6xl leading-none">{openReports ?? 0}</p>
+              </div>
+            </aside>
+          </section>
 
-          <div className="border-border mt-6 flex gap-1 border-b">
-            {tabs.map((t) => (
+          <nav
+            className="border-ink bg-background mt-8 grid border-2 sm:inline-grid sm:grid-cols-3"
+            aria-label="Moderation views"
+          >
+            {tabs.map((t, i) => (
               <Link
                 key={t.id}
                 href={`/admin?tab=${t.id}`}
                 className={cn(
-                  'rounded-t-md px-4 py-2 text-sm transition-colors',
+                  'label-mono flex items-center justify-between gap-4 px-4 py-3 font-bold transition-colors sm:justify-center',
+                  i > 0 && 'border-ink border-t-2 sm:border-t-0 sm:border-l-2',
                   tab === t.id
-                    ? 'border-accent text-foreground border-b-2 font-medium'
-                    : 'text-muted hover:text-foreground',
+                    ? 'bg-ink text-background'
+                    : 'text-muted hover:bg-ink hover:text-background',
                 )}
+                aria-current={tab === t.id ? 'page' : undefined}
               >
                 {t.label}
+                {t.count !== null && (
+                  <span
+                    className={cn(
+                      'ml-1.5 font-bold',
+                      tab === t.id ? 'text-on-accent' : 'text-accent',
+                    )}
+                  >
+                    {t.count}
+                  </span>
+                )}
               </Link>
             ))}
-          </div>
+          </nav>
 
-          <div className="mt-6">
+          <section className="mt-6" aria-live="polite">
             {tab === 'pending' && (
               <div className="space-y-6">
                 {(pending ?? []).length === 0 && (
-                  <p className="text-muted py-12 text-center text-sm">
-                    Nothing waiting for review. 🎉
+                  <p className="label-mono text-muted border-ink border-2 border-dashed py-12 text-center">
+                    Nothing waiting for review.
                   </p>
                 )}
                 {((pending ?? []) as unknown as PendingCreation[]).map((creation) => (
@@ -101,7 +136,7 @@ export default async function AdminPage({ searchParams }: PageProps) {
               <ReportsList reports={(reports ?? []) as unknown as ReportRow[]} />
             )}
             {tab === 'all' && <AllContentList rows={allContent} />}
-          </div>
+          </section>
         </Container>
       </main>
     </>

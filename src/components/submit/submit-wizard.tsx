@@ -15,7 +15,7 @@ import { CATEGORIES } from '@/types/database'
 import type { UploadedMedia } from '@/lib/upload'
 import { cn } from '@/lib/utils'
 
-const STEPS = ['Details', 'Media', 'Link & prompt', 'Review'] as const
+const STEPS = ['Project', 'Media', 'URL & prompt', 'Review'] as const
 
 export function SubmitWizard({ userId }: { userId: string }) {
   const router = useRouter()
@@ -80,224 +80,268 @@ export function SubmitWizard({ userId }: { userId: string }) {
     })
   }
 
+  const currentStep = STEPS[step]
+
   return (
-    <div className="mt-8">
-      <ol className="flex items-center gap-2" aria-label="Progress">
-        {STEPS.map((label, i) => (
-          <li key={label} className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => i < step && setStep(i)}
-              className={cn(
-                'flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-colors',
-                i < step && 'bg-accent text-on-accent cursor-pointer',
-                i === step && 'bg-accent/20 text-accent border-accent border',
-                i > step && 'bg-surface-raised text-muted-foreground',
-              )}
-              aria-current={i === step ? 'step' : undefined}
-            >
-              {i < step ? <Check className="h-3.5 w-3.5" aria-hidden /> : i + 1}
-            </button>
-            <span
-              className={cn(
-                'hidden text-sm sm:inline',
-                i === step ? 'text-foreground font-medium' : 'text-muted-foreground',
-              )}
-            >
-              {label}
-            </span>
-            {i < STEPS.length - 1 && <span className="bg-border h-px w-4 sm:w-8" aria-hidden />}
-          </li>
-        ))}
-      </ol>
-
-      <div className="mt-8 space-y-6">
-        {step === 0 && (
-          <>
-            <label className="block">
-              <span className="mb-1.5 block text-sm font-medium">Title</span>
-              <Input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="What did you make?"
-                maxLength={120}
-                autoFocus
-              />
-            </label>
-
-            <div>
-              <span className="mb-1.5 block text-sm font-medium">Category</span>
-              <div className="flex flex-wrap gap-2">
-                {CATEGORIES.map((c) => (
-                  <button
-                    key={c.slug}
-                    type="button"
-                    onClick={() => setCategory(c.slug)}
-                    className={cn(
-                      'cursor-pointer rounded-full border px-3.5 py-1.5 text-sm transition-colors',
-                      category === c.slug
-                        ? 'bg-accent text-on-accent border-accent font-medium'
-                        : 'border-border text-muted hover:border-border-strong hover:text-foreground',
-                    )}
-                  >
-                    {c.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <label className="block">
-              <span className="mb-1.5 block text-sm font-medium">
-                The story <span className="text-muted-foreground font-normal">(optional)</span>
-              </span>
-              <Textarea
-                value={story}
-                onChange={(e) => setStory(e.target.value)}
-                placeholder="How did you make it? What surprised you?"
-                maxLength={5000}
-                rows={4}
-              />
-            </label>
-
-            <div>
-              <span className="mb-1.5 block text-sm font-medium">
-                Tags <span className="text-muted-foreground font-normal">(optional, up to 5)</span>
-              </span>
-              <TagInput tags={tags} onChange={setTags} />
-            </div>
-          </>
-        )}
-
-        {step === 1 && <MediaUploader userId={userId} items={media} onChange={setMedia} />}
-
-        {step === 2 && (
-          <>
-            <div>
-              <span className="mb-1.5 block text-sm font-medium">
-                Live link <span className="text-muted-foreground font-normal">(optional)</span>
-              </span>
-              <div className="flex gap-2">
-                <Input
-                  type="url"
-                  value={liveUrl}
-                  onChange={(e) => setLiveUrl(e.target.value)}
-                  placeholder="https://your-creation.example.com"
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={fetchPreview}
-                  disabled={!liveUrl || previewLoading}
+    <section className="mt-10 grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
+      <aside className="border-ink bg-background border-2 lg:sticky lg:top-24 lg:self-start">
+        <div className="border-ink border-b-2 p-4">
+          <p className="label-mono text-muted-foreground">Progress</p>
+          <p className="font-display mt-2 text-5xl leading-none">
+            {String(step + 1).padStart(2, '0')}/{String(STEPS.length).padStart(2, '0')}
+          </p>
+        </div>
+        <ol className="divide-ink divide-y-2" aria-label="Submission progress">
+          {STEPS.map((label, i) => (
+            <li key={label}>
+              <button
+                type="button"
+                onClick={() => i < step && setStep(i)}
+                disabled={i > step}
+                className={cn(
+                  'group flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
+                  i < step && 'text-muted hover:bg-ink hover:text-background cursor-pointer',
+                  i === step && 'bg-ink text-background',
+                  i > step && 'text-muted-foreground cursor-not-allowed',
+                )}
+                aria-current={i === step ? 'step' : undefined}
+              >
+                <span
+                  className={cn(
+                    'label-mono flex h-8 w-8 shrink-0 items-center justify-center border-2 font-bold',
+                    i === step
+                      ? 'border-background text-background'
+                      : 'border-ink text-ink group-hover:border-background group-hover:text-background',
+                  )}
                 >
-                  {previewLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                  ) : (
-                    <Globe className="h-4 w-4" aria-hidden />
-                  )}
-                  Preview
-                </Button>
-              </div>
-              {preview && (
-                <div className="border-border mt-3 flex items-center gap-3 rounded-lg border p-3">
-                  {preview.imageUrl ? (
-                    <img src={preview.imageUrl} alt="" className="h-14 w-24 rounded object-cover" />
-                  ) : (
-                    <Globe className="text-muted h-6 w-6" aria-hidden />
-                  )}
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">{preview.title ?? liveUrl}</p>
-                    <p className="text-muted-foreground truncate text-xs">{liveUrl}</p>
-                  </div>
-                </div>
-              )}
-            </div>
+                  {i < step ? <Check className="text-accent h-3.5 w-3.5" aria-hidden /> : i + 1}
+                </span>
+                <span className="label-mono font-bold">{label}</span>
+              </button>
+            </li>
+          ))}
+        </ol>
+      </aside>
 
-            <label className="block">
-              <span className="mb-1.5 block text-sm font-medium">
-                The prompt <span className="text-muted-foreground font-normal">(optional)</span>
-              </span>
-              <Textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Share the prompt you gave Fable — others can learn from it."
-                maxLength={10000}
-                rows={6}
-                className="font-mono text-xs leading-relaxed"
-              />
-            </label>
-          </>
-        )}
-
-        {step === 3 && (
-          <div className="border-border space-y-4 rounded-lg border p-5">
-            <div>
-              <p className="text-muted-foreground text-xs uppercase">Title</p>
-              <p className="font-medium">{title}</p>
-            </div>
-            <div className="flex gap-8">
-              <div>
-                <p className="text-muted-foreground text-xs uppercase">Category</p>
-                <p className="text-sm">{CATEGORIES.find((c) => c.slug === category)?.name}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground text-xs uppercase">Media</p>
-                <p className="text-sm">
-                  {media.filter((m) => m.kind === 'image').length} image(s)
-                  {media.some((m) => m.kind === 'video') && ', 1 video'}
-                </p>
-              </div>
-              {liveUrl && (
-                <div className="min-w-0">
-                  <p className="text-muted-foreground text-xs uppercase">Live link</p>
-                  <p className="truncate text-sm">{liveUrl}</p>
-                </div>
-              )}
-            </div>
-            {tags.length > 0 && (
-              <div>
-                <p className="text-muted-foreground text-xs uppercase">Tags</p>
-                <p className="text-sm">{tags.join(', ')}</p>
-              </div>
-            )}
-            <p className="text-muted border-border border-t pt-4 text-sm">
-              Your creation will appear in the gallery once it&apos;s approved — usually within a
-              day.
-            </p>
+      <div className="border-ink bg-background border-2 shadow-[6px_6px_0_0_var(--color-ink)]">
+        <div className="border-ink grid grid-cols-[1fr_auto] border-b-2">
+          <div className="px-4 py-4 sm:px-6">
+            <p className="label-mono text-muted-foreground">Step {step + 1}</p>
+            <h2 className="font-display mt-1 text-5xl leading-none uppercase sm:text-6xl">
+              {currentStep}
+            </h2>
           </div>
-        )}
+          <div className="border-ink flex items-center border-l-2 px-4 sm:px-6">
+            <span className="bg-accent block h-6 w-6" aria-hidden />
+          </div>
+        </div>
 
-        {error && <p className="text-error text-sm">{error}</p>}
+        <div className="space-y-6 p-4 sm:p-6">
+          {step === 0 && (
+            <div className="space-y-6">
+              <label className="block">
+                <span className="label-mono mb-2 block font-bold">Project title</span>
+                <Input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="What did you make?"
+                  maxLength={120}
+                  autoFocus
+                  className="h-12 text-base"
+                />
+              </label>
 
-        <div className="flex justify-between pt-2">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => setStep((s) => Math.max(0, s - 1))}
-            className={cn(step === 0 && 'invisible')}
-          >
-            Back
-          </Button>
-          {step < STEPS.length - 1 ? (
-            <Button
-              type="button"
-              onClick={() => setStep((s) => s + 1)}
-              disabled={(step === 0 && !detailsValid) || (step === 2 && !hasContent)}
-            >
-              Continue
-            </Button>
-          ) : (
-            <Button type="button" onClick={submit} disabled={pending}>
-              {pending ? <Spinner className="text-on-accent h-4 w-4" /> : null}
-              Submit for review
-            </Button>
+              <div>
+                <span className="label-mono mb-2 block font-bold">Category</span>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" role="group">
+                  {CATEGORIES.map((c) => (
+                    <button
+                      key={c.slug}
+                      type="button"
+                      onClick={() => setCategory(c.slug)}
+                      aria-pressed={category === c.slug}
+                      className={cn(
+                        'label-mono min-h-11 cursor-pointer border-2 px-3 py-2 text-left font-bold transition-all',
+                        category === c.slug
+                          ? 'border-ink bg-ink text-background shadow-[3px_3px_0_0_var(--color-accent)]'
+                          : 'border-ink text-muted hover:bg-ink hover:text-background hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_var(--color-ink)]',
+                      )}
+                    >
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <label className="block">
+                <span className="label-mono mb-2 block font-bold">
+                  Description <span className="text-muted-foreground">(optional)</span>
+                </span>
+                <Textarea
+                  value={story}
+                  onChange={(e) => setStory(e.target.value)}
+                  placeholder="What does it do? How did you make it? What should people notice?"
+                  maxLength={5000}
+                  rows={4}
+                />
+              </label>
+
+              <div>
+                <span className="label-mono mb-2 block font-bold">
+                  Tags <span className="text-muted-foreground">(optional, up to 5)</span>
+                </span>
+                <TagInput tags={tags} onChange={setTags} />
+              </div>
+            </div>
+          )}
+
+          {step === 1 && <MediaUploader userId={userId} items={media} onChange={setMedia} />}
+
+          {step === 2 && (
+            <div className="space-y-6">
+              <div>
+                <span className="label-mono mb-2 block font-bold">
+                  Project URL <span className="text-muted-foreground">(optional)</span>
+                </span>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Input
+                    type="url"
+                    value={liveUrl}
+                    onChange={(e) => setLiveUrl(e.target.value)}
+                    placeholder="https://your-project.example.com"
+                    className="h-12"
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={fetchPreview}
+                    disabled={!liveUrl || previewLoading}
+                    className="h-12 sm:w-auto"
+                  >
+                    {previewLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                    ) : (
+                      <Globe className="h-4 w-4" aria-hidden />
+                    )}
+                    Preview
+                  </Button>
+                </div>
+                {preview && (
+                  <div className="border-ink mt-3 grid border-2 sm:grid-cols-[128px_minmax(0,1fr)]">
+                    <div className="border-ink bg-surface-raised flex min-h-24 items-center justify-center border-b-2 sm:border-r-2 sm:border-b-0">
+                      {preview.imageUrl ? (
+                        <img
+                          src={preview.imageUrl}
+                          alt=""
+                          className="h-full min-h-24 w-full object-cover"
+                        />
+                      ) : (
+                        <Globe className="text-muted h-6 w-6" aria-hidden />
+                      )}
+                    </div>
+                    <div className="min-w-0 p-4">
+                      <p className="truncate text-sm font-bold tracking-wide uppercase">
+                        {preview.title ?? liveUrl}
+                      </p>
+                      <p className="label-mono text-muted-foreground mt-2 truncate">{liveUrl}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <label className="block">
+                <span className="label-mono mb-2 block font-bold">
+                  Prompt or build notes <span className="text-muted-foreground">(optional)</span>
+                </span>
+                <Textarea
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder="Share the prompt, build notes, or short process behind the project."
+                  maxLength={10000}
+                  rows={7}
+                  className="font-mono text-xs leading-relaxed"
+                />
+              </label>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="border-ink border-2">
+              <div className="border-ink border-b-2 px-5 py-4">
+                <p className="label-mono text-muted-foreground">Title</p>
+                <p className="mt-1 text-lg font-bold tracking-wide uppercase">{title}</p>
+              </div>
+              <div className="border-ink grid border-b-2 sm:grid-cols-3">
+                <div className="border-ink border-b-2 px-5 py-4 sm:border-r-2 sm:border-b-0">
+                  <p className="label-mono text-muted-foreground">Category</p>
+                  <p className="mt-1 text-sm">
+                    {CATEGORIES.find((c) => c.slug === category)?.name}
+                  </p>
+                </div>
+                <div className="border-ink border-b-2 px-5 py-4 sm:border-r-2 sm:border-b-0">
+                  <p className="label-mono text-muted-foreground">Media</p>
+                  <p className="mt-1 text-sm">
+                    {media.filter((m) => m.kind === 'image').length} image(s)
+                    {media.some((m) => m.kind === 'video') && ', 1 video'}
+                  </p>
+                </div>
+                <div className="min-w-0 px-5 py-4">
+                  <p className="label-mono text-muted-foreground">Project URL</p>
+                  <p className="mt-1 truncate text-sm">{liveUrl || 'No link added'}</p>
+                </div>
+              </div>
+              {tags.length > 0 && (
+                <div className="border-ink border-b-2 px-5 py-4">
+                  <p className="label-mono text-muted-foreground">Tags</p>
+                  <p className="mt-1 text-sm">{tags.join(', ')}</p>
+                </div>
+              )}
+              <p className="label-mono text-muted px-5 py-4">
+                Your project will enter the review queue. If approved, it pins to the public board
+                for everyone to see.
+              </p>
+            </div>
+          )}
+
+          {error && (
+            <p className="label-mono border-accent text-accent border-2 px-3 py-2" role="alert">
+              {error}
+            </p>
           )}
         </div>
-        {step === 2 && !hasContent && (
-          <p className="text-muted-foreground text-right text-xs">
-            Add at least one image, video, or live link to continue.
-          </p>
-        )}
+
+        <div className="border-ink bg-surface-raised border-t-2 px-4 py-4 sm:px-6">
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setStep((s) => Math.max(0, s - 1))}
+              className={cn(step === 0 && 'invisible')}
+            >
+              Back
+            </Button>
+            {step < STEPS.length - 1 ? (
+              <Button
+                type="button"
+                onClick={() => setStep((s) => s + 1)}
+                disabled={(step === 0 && !detailsValid) || (step === 2 && !hasContent)}
+              >
+                Continue
+              </Button>
+            ) : (
+              <Button type="button" onClick={submit} disabled={pending}>
+                {pending ? <Spinner className="text-on-accent h-4 w-4" /> : null}
+                Submit for review
+              </Button>
+            )}
+          </div>
+          {step === 2 && !hasContent && (
+            <p className="label-mono text-muted-foreground mt-3 text-right">
+              Add at least one image, video, or live link to continue.
+            </p>
+          )}
+        </div>
       </div>
-    </div>
+    </section>
   )
 }

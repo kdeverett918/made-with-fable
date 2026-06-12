@@ -10,7 +10,11 @@ const profileSchema = z.object({
     .regex(/^[a-z0-9_]{3,24}$/, 'Use 3–24 lowercase letters, numbers, or underscores'),
   display_name: z.string().max(60).optional().or(z.literal('')),
   bio: z.string().max(280).optional().or(z.literal('')),
-  website_url: z.url('Enter a valid URL').optional().or(z.literal('')),
+  website_url: z
+    .url('Enter a valid URL')
+    .refine((u) => /^https?:\/\//i.test(u), 'Enter an http(s) URL')
+    .optional()
+    .or(z.literal('')),
   avatar_url: z.string().optional().or(z.literal('')),
 })
 

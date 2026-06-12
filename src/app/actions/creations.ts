@@ -5,6 +5,7 @@ import { nanoid } from 'nanoid'
 import { z } from 'zod'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { fetchOgPreview, downloadOgImage } from '@/lib/og-fetch'
+import { fetchRecentCounts, RATE_LIMITS } from '@/lib/rate-limit'
 
 const mediaItemSchema = z.object({
   kind: z.enum(['image', 'video']),
@@ -18,7 +19,12 @@ const createCreationSchema = z.object({
   title: z.string().min(3).max(120),
   story: z.string().max(5000).optional().or(z.literal('')),
   prompt: z.string().max(10000).optional().or(z.literal('')),
-  live_url: z.url().max(2000).optional().or(z.literal('')),
+  live_url: z
+    .url()
+    .max(2000)
+    .refine((u) => /^https?:\/\//i.test(u), 'Live link must be an http(s) URL')
+    .optional()
+    .or(z.literal('')),
   category_slug: z.string().min(1),
   tags: z.array(z.string().regex(/^[a-z0-9-]{2,30}$/)).max(5),
   media: z.array(mediaItemSchema).max(7),
@@ -42,6 +48,11 @@ export async function createCreation(input: CreateCreationInput): Promise<Create
 
   if (!data.live_url && data.media.length === 0) {
     return { ok: false, error: 'Add at least one image, video, or live link' }
+  }
+
+  const recent = await fetchRecentCounts(supabase)
+  if (recent.creations_1d >= RATE_LIMITS.creationsPerDay) {
+    return { ok: false, error: 'Submission limit reached for today — try again tomorrow' }
   }
 
   const videos = data.media.filter((m) => m.kind === 'video')
@@ -153,8 +164,8 @@ export async function deleteCreation(id: string): Promise<{ ok: boolean }> {
   } = await supabase.auth.getUser()
   if (!user) return { ok: false }
 
-  const { error } = await supabase.from('creations').delete().eq('id', id)
-  if (error) return { ok: false }
+  const { data, error } = await supabase.from('creations').delete().eq('id', id).select('id')
+  if (error || !data?.length) return { ok: false }
   revalidatePath('/')
   return { ok: true }
 }

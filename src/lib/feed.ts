@@ -29,12 +29,31 @@ function decodeCursor(cursor: string): Record<string, unknown> | null {
   }
 }
 
+/** Authors the signed-in viewer follows, for the "Following" feed. Capped to keep the RPC payload bounded. */
+export async function fetchFollowedAuthorIds(): Promise<string[] | null> {
+  const supabase = await createSupabaseServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data } = await supabase
+    .from('follows')
+    .select('followee_id')
+    .eq('follower_id', user.id)
+    .limit(1000)
+  return (data ?? []).map((row) => row.followee_id)
+}
+
 export async function fetchFeedPage(opts: {
   sort: FeedSort
   category?: string | null
   tag?: string | null
   cursor?: string | null
+  authors?: string[] | null
 }): Promise<FeedPageResult> {
+  if (opts.authors && opts.authors.length === 0) return { items: [], nextCursor: null }
+
   const supabase = await createSupabaseServerClient()
   const { data, error } = await supabase.rpc('feed_page', {
     p_sort: opts.sort,
@@ -42,6 +61,7 @@ export async function fetchFeedPage(opts: {
     p_tag: opts.tag ?? null,
     p_cursor: opts.cursor ? decodeCursor(opts.cursor) : null,
     p_limit: FEED_PAGE_SIZE,
+    p_authors: opts.authors ?? null,
   })
 
   if (error || !data) return { items: [], nextCursor: null }

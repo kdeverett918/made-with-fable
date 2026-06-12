@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { sanitizeRedirectPath } from '@/lib/auth/redirect'
 
 const PROTECTED_PREFIXES = ['/submit', '/settings', '/admin']
 
@@ -19,7 +20,9 @@ export async function middleware(request: NextRequest) {
     if (isProtected(pathname)) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
-      url.search = `?redirectTo=${encodeURIComponent(pathname)}`
+      url.search = `?redirectTo=${encodeURIComponent(
+        sanitizeRedirectPath(`${pathname}${request.nextUrl.search}`),
+      )}`
       return NextResponse.redirect(url)
     }
     return NextResponse.next()
@@ -53,7 +56,9 @@ export async function middleware(request: NextRequest) {
   if (!user && isProtected(pathname)) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    url.search = `?redirectTo=${encodeURIComponent(pathname)}`
+    url.search = `?redirectTo=${encodeURIComponent(
+      sanitizeRedirectPath(`${pathname}${request.nextUrl.search}`),
+    )}`
     return NextResponse.redirect(url)
   }
 

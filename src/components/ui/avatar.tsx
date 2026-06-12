@@ -17,14 +17,14 @@ export function Avatar({ src, name, size = 32, className }: AvatarProps) {
       width={size}
       height={size}
       referrerPolicy="no-referrer"
-      className={cn('rounded-full object-cover', className)}
+      className={cn('border-ink border-2 object-cover', className)}
       style={{ width: size, height: size }}
     />
   ) : (
     <span
       aria-hidden
       className={cn(
-        'bg-accent/20 text-accent flex items-center justify-center rounded-full font-medium',
+        'border-ink bg-ink text-background flex items-center justify-center border-2 font-mono font-bold',
         className,
       )}
       style={{ width: size, height: size, fontSize: size * 0.45 }}

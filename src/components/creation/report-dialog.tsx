@@ -1,100 +1,155 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Flag, X } from 'lucide-react'
 import { reportCreation } from '@/app/actions/engagement'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
 
 const REASONS = [
-  { value: 'spam', label: 'Spam or self-promotion' },
-  { value: 'inappropriate', label: 'Inappropriate content' },
-  { value: 'not_fable', label: 'Not made with Fable' },
-  { value: 'other', label: 'Something else' },
+  { value: 'spam', label: 'Spam' },
+  { value: 'inappropriate', label: 'Inappropriate' },
+  { value: 'not_fable', label: 'Not Fable' },
+  { value: 'other', label: 'Other' },
 ] as const
 
-export function ReportDialog({ creationId, signedIn }: { creationId: string; signedIn: boolean }) {
+export function ReportDialog({
+  creationId,
+  signedIn,
+  className,
+}: {
+  creationId: string
+  signedIn: boolean
+  className?: string
+}) {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [reason, setReason] = useState<string>('spam')
+  const [reason, setReason] = useState<(typeof REASONS)[number]['value']>('spam')
   const [detail, setDetail] = useState('')
-  const [done, setDone] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
-  if (!signedIn) return null
+  function openDialog() {
+    if (!signedIn) {
+      router.push(`/login?redirectTo=/c/${creationId}`)
+      return
+    }
+    setMessage(null)
+    setOpen(true)
+  }
 
-  function submit() {
+  function submit(e: React.FormEvent) {
+    e.preventDefault()
+    setMessage(null)
     startTransition(async () => {
       const result = await reportCreation({ creationId, reason, detail })
-      if (result.ok) setDone(true)
+      if (result.ok) {
+        setMessage('Report filed. A moderator will review it.')
+        setDetail('')
+        window.setTimeout(() => setOpen(false), 900)
+      } else {
+        setMessage(result.error ?? 'Could not file report')
+      }
     })
   }
 
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
-        className="text-muted-foreground hover:text-error flex cursor-pointer items-center gap-1.5 text-xs transition-colors"
+        type="button"
+        onClick={openDialog}
+        className={cn(
+          'label-mono text-muted hover:text-accent flex cursor-pointer items-center gap-1.5 font-bold transition-colors',
+          className,
+        )}
       >
-        <Flag className="h-3.5 w-3.5" aria-hidden /> Report
+        <Flag className="h-3.5 w-3.5" aria-hidden />
+        Report
       </button>
 
       {open && (
-        <div
-          className="bg-background/80 fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Report this creation"
-          onClick={(e) => e.target === e.currentTarget && setOpen(false)}
-        >
-          <div className="border-border bg-surface animate-scale-in w-full max-w-sm rounded-lg border p-5">
-            <div className="flex items-center justify-between">
-              <h2 className="font-medium">Report this creation</h2>
+        <div className="bg-ink/60 fixed inset-0 z-50 grid place-items-center p-4">
+          <form
+            onSubmit={submit}
+            className="bg-background border-ink animate-scale-in w-full max-w-lg border-2 shadow-[6px_6px_0_0_var(--color-ink)]"
+          >
+            <header className="border-ink flex items-center justify-between border-b-2 px-4 py-3">
+              <div>
+                <p className="label-mono text-accent font-bold">Moderation note</p>
+                <h2 className="font-display mt-1 text-3xl leading-none tracking-normal uppercase">
+                  Report this
+                </h2>
+              </div>
               <button
+                type="button"
                 onClick={() => setOpen(false)}
-                aria-label="Close"
-                className="text-muted cursor-pointer"
+                aria-label="Close report dialog"
+                className="border-ink hover:bg-ink hover:text-background grid h-9 w-9 cursor-pointer place-items-center border-2 transition-colors"
               >
                 <X className="h-4 w-4" aria-hidden />
               </button>
-            </div>
+            </header>
 
-            {done ? (
-              <p className="text-muted mt-4 text-sm">
-                Thanks — we&apos;ll take a look. You can close this now.
-              </p>
-            ) : (
-              <>
-                <div className="mt-4 space-y-2">
-                  {REASONS.map((r) => (
-                    <button
-                      key={r.value}
-                      onClick={() => setReason(r.value)}
+            <div className="space-y-4 p-4">
+              <fieldset>
+                <legend className="label-mono text-ink mb-2 font-bold">Reason</legend>
+                <div className="grid grid-cols-2 gap-2">
+                  {REASONS.map((item) => (
+                    <label
+                      key={item.value}
                       className={cn(
-                        'block w-full cursor-pointer rounded-md border px-3 py-2 text-left text-sm transition-colors',
-                        reason === r.value
-                          ? 'border-accent/50 bg-accent/10 text-foreground'
-                          : 'border-border text-muted hover:border-border-strong',
+                        'label-mono border-ink flex cursor-pointer items-center justify-between border-2 px-3 py-2 font-bold',
+                        reason === item.value && 'bg-ink text-background',
                       )}
                     >
-                      {r.label}
-                    </button>
+                      {item.label}
+                      <input
+                        type="radio"
+                        name="reason"
+                        value={item.value}
+                        checked={reason === item.value}
+                        onChange={() => setReason(item.value)}
+                        className="sr-only"
+                      />
+                    </label>
                   ))}
                 </div>
+              </fieldset>
+
+              <div>
+                <label htmlFor="report-detail" className="label-mono text-ink mb-2 block font-bold">
+                  Detail
+                </label>
                 <Textarea
+                  id="report-detail"
                   value={detail}
                   onChange={(e) => setDetail(e.target.value)}
-                  placeholder="Anything else we should know? (optional)"
                   maxLength={500}
-                  rows={2}
-                  className="mt-3"
+                  rows={4}
+                  placeholder="Optional context for moderators."
                 />
-                <Button onClick={submit} disabled={pending} className="mt-4 w-full" size="sm">
-                  Submit report
+              </div>
+
+              {message && (
+                <p className="label-mono border-ink border-2 px-3 py-2" aria-live="polite">
+                  {message}
+                </p>
+              )}
+
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
+                  Cancel
                 </Button>
-              </>
-            )}
-          </div>
+                <Button type="submit" variant="destructive" disabled={pending}>
+                  {pending ? <Spinner className="text-on-accent h-3.5 w-3.5" /> : null}
+                  File report
+                </Button>
+              </div>
+            </div>
+          </form>
         </div>
       )}
     </>

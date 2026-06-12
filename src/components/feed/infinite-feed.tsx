@@ -11,6 +11,7 @@ interface InfiniteFeedProps {
   sort: string
   category: string | null
   tag: string | null
+  feed?: string | null
 }
 
 export function InfiniteFeed({
@@ -19,6 +20,7 @@ export function InfiniteFeed({
   sort,
   category,
   tag,
+  feed,
 }: InfiniteFeedProps) {
   const [items, setItems] = useState(initialItems)
   const [cursor, setCursor] = useState(initialCursor)
@@ -35,6 +37,7 @@ export function InfiniteFeed({
       const params = new URLSearchParams({ sort, cursor })
       if (category) params.set('category', category)
       if (tag) params.set('tag', tag)
+      if (feed) params.set('feed', feed)
       const res = await fetch(`/api/feed?${params}`)
       if (res.ok) {
         const page: { items: FeedItem[]; nextCursor: string | null } = await res.json()
@@ -49,7 +52,7 @@ export function InfiniteFeed({
     } finally {
       setLoading(false)
     }
-  }, [cursor, loading, sort, category, tag])
+  }, [cursor, loading, sort, category, tag, feed])
 
   useEffect(() => {
     const sentinel = sentinelRef.current
@@ -64,10 +67,18 @@ export function InfiniteFeed({
 
   if (items.length === 0) {
     return (
-      <div className="border-border rounded-lg border border-dashed py-20 text-center">
-        <p className="font-display text-xl">Nothing here yet</p>
-        <p className="text-muted mt-2 text-sm">
-          Be the first — share what you&apos;ve made with Fable.
+      <div className="border-ink bg-surface relative overflow-hidden border-2 border-dashed py-20 text-center shadow-[4px_4px_0_0_var(--color-ink)]">
+        <span
+          className="bg-accent border-ink absolute top-0 left-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rotate-45 border-2"
+          aria-hidden
+        />
+        <p className="font-display text-3xl leading-none uppercase">
+          {feed === 'following' ? 'Your board is empty' : 'Nothing here yet'}
+        </p>
+        <p className="label-mono text-muted mt-3">
+          {feed === 'following'
+            ? 'Follow some makers and their projects will pin here.'
+            : "Be the first — submit what you've made with Fable."}
         </p>
       </div>
     )

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { fetchRecentCounts, RATE_LIMITS } from '@/lib/rate-limit'
 
 export async function toggleLike(creationId: string): Promise<{ ok: boolean; liked?: boolean }> {
   const supabase = await createSupabaseServerClient()
@@ -51,6 +52,11 @@ export async function addComment(
   const parsed = commentSchema.safeParse({ creationId, body })
   if (!parsed.success) return { ok: false, error: 'Comment must be 1–2000 characters' }
 
+  const recent = await fetchRecentCounts(supabase)
+  if (recent.comments_1m >= RATE_LIMITS.commentsPerMinute) {
+    return { ok: false, error: 'You are commenting too fast — wait a minute' }
+  }
+
   const { error } = await supabase.from('comments').insert({
     creation_id: parsed.data.creationId,
     author_id: user.id,
@@ -62,14 +68,43 @@ export async function addComment(
   return { ok: true }
 }
 
+const deleteCommentSchema = z.object({
+  commentId: z.uuid(),
+  creationId: z.uuid(),
+})
+
 export async function deleteComment(
   commentId: string,
   creationId: string,
 ): Promise<{ ok: boolean }> {
+  const parsed = deleteCommentSchema.safeParse({ commentId, creationId })
+  if (!parsed.success) return { ok: false }
+
   const supabase = await createSupabaseServerClient()
-  const { error } = await supabase.from('comments').delete().eq('id', commentId)
-  if (!error) revalidatePath(`/c/${creationId}`)
-  return { ok: !error }
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false }
+
+  const { data: viewer } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .single()
+
+  let query = supabase
+    .from('comments')
+    .delete()
+    .eq('id', parsed.data.commentId)
+    .eq('creation_id', parsed.data.creationId)
+
+  if (!viewer?.is_admin) query = query.eq('author_id', user.id)
+
+  const { data, error } = await query.select('id')
+  if (error || !data?.length) return { ok: false }
+
+  revalidatePath(`/c/${parsed.data.creationId}`)
+  return { ok: true }
 }
 
 const reportSchema = z.object({
@@ -91,6 +126,11 @@ export async function reportCreation(input: {
 
   const parsed = reportSchema.safeParse(input)
   if (!parsed.success) return { ok: false, error: 'Invalid report' }
+
+  const recent = await fetchRecentCounts(supabase)
+  if (recent.reports_1h >= RATE_LIMITS.reportsPerHour) {
+    return { ok: false, error: 'Report limit reached — try again later' }
+  }
 
   const { error } = await supabase.from('reports').insert({
     creation_id: parsed.data.creationId,

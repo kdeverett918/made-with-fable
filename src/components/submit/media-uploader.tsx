@@ -26,6 +26,7 @@ export function MediaUploader({ userId, items, onChange }: MediaUploaderProps) {
 
   const imageCount = items.filter((m) => m.kind === 'image').length
   const hasVideo = items.some((m) => m.kind === 'video')
+  const remainingImages = Math.max(0, MAX_IMAGES - imageCount)
 
   async function handleFiles(files: FileList | File[]) {
     setError(null)
@@ -66,7 +67,7 @@ export function MediaUploader({ userId, items, onChange }: MediaUploaderProps) {
   }
 
   return (
-    <div>
+    <div className="space-y-4">
       <button
         type="button"
         onClick={() => fileRef.current?.click()}
@@ -80,19 +81,34 @@ export function MediaUploader({ userId, items, onChange }: MediaUploaderProps) {
           setDragging(false)
           handleFiles(e.dataTransfer.files)
         }}
+        aria-describedby="media-rules media-status"
         className={cn(
-          'border-border hover:border-accent/50 flex w-full cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed px-6 py-10 transition-colors',
-          dragging && 'border-accent bg-accent/5',
+          'group border-ink bg-background hover:bg-surface-raised grid w-full cursor-pointer border-2 border-dashed text-left transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_var(--color-ink)] sm:grid-cols-[1fr_180px]',
+          dragging &&
+            'border-accent bg-surface-raised -translate-x-0.5 -translate-y-0.5 shadow-[4px_4px_0_0_var(--color-accent)]',
         )}
       >
-        <div className="text-accent flex gap-3">
-          <ImagePlus className="h-6 w-6" aria-hidden />
-          <Film className="h-6 w-6" aria-hidden />
+        <div className="p-5 sm:p-6">
+          <div className="text-accent flex gap-3">
+            <ImagePlus className="h-6 w-6" aria-hidden />
+            <Film className="h-6 w-6" aria-hidden />
+          </div>
+          <p className="font-display mt-5 text-5xl leading-none uppercase sm:text-6xl">Pin media</p>
+          <p id="media-rules" className="label-mono text-muted mt-4 max-w-xl">
+            Drop screenshots or a short video here. Up to {MAX_IMAGES} images, one MP4/WebM video,
+            max 25MB and 60 seconds.
+          </p>
         </div>
-        <p className="text-sm font-medium">Drop screenshots or a short video here</p>
-        <p className="text-muted-foreground text-xs">
-          Up to {MAX_IMAGES} images · one video (MP4/WebM, max 25MB / 60s)
-        </p>
+        <div className="border-ink grid grid-cols-2 border-t-2 sm:grid-cols-1 sm:border-t-0 sm:border-l-2">
+          <div className="border-ink border-r-2 p-4 sm:border-r-0 sm:border-b-2">
+            <p className="label-mono text-muted-foreground">Images left</p>
+            <p className="font-display mt-1 text-4xl leading-none">{remainingImages}</p>
+          </div>
+          <div className="p-4">
+            <p className="label-mono text-muted-foreground">Video</p>
+            <p className="font-display mt-1 text-4xl leading-none">{hasVideo ? 'Set' : 'Open'}</p>
+          </div>
+        </div>
       </button>
       <input
         ref={fileRef}
@@ -103,38 +119,39 @@ export function MediaUploader({ userId, items, onChange }: MediaUploaderProps) {
         onChange={(e) => e.target.files && handleFiles(e.target.files)}
       />
 
-      {error && <p className="text-error mt-2 text-sm">{error}</p>}
+      <p id="media-status" className="label-mono text-muted-foreground">
+        {items.length} pinned item{items.length === 1 ? '' : 's'}
+        {uploadingCount > 0 ? `, ${uploadingCount} uploading` : ''}
+      </p>
+
+      {error && (
+        <p className="label-mono border-accent text-accent border-2 px-3 py-2" role="alert">
+          {error}
+        </p>
+      )}
 
       {(items.length > 0 || uploadingCount > 0) && (
-        <ul className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {items.map((item, i) => (
-            <li key={item.storage_path} className="group relative">
-              <img
-                src={item.kind === 'video' ? '' : item.previewUrl}
-                alt=""
-                className={cn(
-                  'aspect-square w-full rounded-md object-cover',
-                  item.kind === 'video' && 'hidden',
-                )}
-              />
-              {item.kind === 'video' && (
-                <video
-                  src={item.previewUrl}
-                  muted
-                  className="aspect-square w-full rounded-md object-cover"
-                />
+            <li
+              key={item.storage_path}
+              className="group border-ink bg-surface-raised relative border-2"
+            >
+              {item.kind === 'image' ? (
+                <img src={item.previewUrl} alt="" className="aspect-square w-full object-cover" />
+              ) : (
+                <video src={item.previewUrl} muted className="aspect-square w-full object-cover" />
               )}
               {item.kind === 'video' && (
-                <Film
-                  className="absolute bottom-1.5 left-1.5 h-4 w-4 text-white drop-shadow"
-                  aria-hidden
-                />
+                <span className="bg-ink text-background absolute bottom-0 left-0 p-1">
+                  <Film className="h-3.5 w-3.5" aria-hidden />
+                </span>
               )}
               <button
                 type="button"
                 onClick={() => remove(i)}
                 aria-label="Remove"
-                className="bg-background/80 absolute top-1.5 right-1.5 cursor-pointer rounded-full p-1 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                className="bg-ink text-background absolute top-0 right-0 cursor-pointer p-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
               >
                 <X className="h-3.5 w-3.5" aria-hidden />
               </button>
@@ -143,7 +160,7 @@ export function MediaUploader({ userId, items, onChange }: MediaUploaderProps) {
           {Array.from({ length: uploadingCount }).map((_, i) => (
             <li
               key={`uploading-${i}`}
-              className="bg-surface-raised flex aspect-square items-center justify-center rounded-md"
+              className="border-ink bg-surface-raised flex aspect-square items-center justify-center border-2"
             >
               <Spinner />
             </li>

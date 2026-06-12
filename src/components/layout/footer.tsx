@@ -1,23 +1,46 @@
 import Link from 'next/link'
-import { Container } from '@/components/layout/container'
 
 export function Footer() {
   return (
-    <footer className="border-border mt-16 border-t py-10">
-      <Container className="text-muted-foreground flex flex-col items-center justify-between gap-4 text-sm sm:flex-row">
-        <p>
-          Made with <span className="text-accent">Fable</span> — a community showcase. Not
-          affiliated with Anthropic.
+    <footer className="border-ink bg-background mt-16 border-t-2">
+      <div className="flex flex-col items-stretch sm:flex-row">
+        <p className="label-mono text-muted border-ink flex items-center px-4 py-3 sm:border-r-2">
+          Made with <span className="text-accent mx-1 font-bold">Fable</span> — a community
+          showcase. Not affiliated with Anthropic.
         </p>
-        <nav className="flex gap-6">
-          <Link href="/about" className="hover:text-foreground transition-colors">
+        <nav className="border-ink flex items-stretch border-t-2 sm:ml-auto sm:border-t-0 sm:border-l-2">
+          <Link
+            href="/makers"
+            className="label-mono text-muted hover:bg-ink hover:text-background border-ink flex items-center border-r-2 px-4 py-3 font-bold transition-colors"
+          >
+            Makers
+          </Link>
+          <Link
+            href="/about"
+            className="label-mono text-muted hover:bg-ink hover:text-background border-ink flex items-center border-r-2 px-4 py-3 font-bold transition-colors"
+          >
             About &amp; guidelines
           </Link>
-          <Link href="/submit" className="hover:text-foreground transition-colors">
-            Submit
+          <Link
+            href="/submit"
+            className="label-mono text-muted hover:bg-ink hover:text-background border-ink flex items-center border-r-2 px-4 py-3 font-bold transition-colors"
+          >
+            Submit a project
+          </Link>
+          <Link
+            href="/privacy"
+            className="label-mono text-muted hover:bg-ink hover:text-background border-ink flex items-center border-r-2 px-4 py-3 font-bold transition-colors"
+          >
+            Privacy
+          </Link>
+          <Link
+            href="/terms"
+            className="label-mono text-muted hover:bg-ink hover:text-background flex items-center px-4 py-3 font-bold transition-colors"
+          >
+            Terms
           </Link>
         </nav>
-      </Container>
+      </div>
     </footer>
   )
 }
