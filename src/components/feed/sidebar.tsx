@@ -39,7 +39,7 @@ export function Sidebar({
   return (
     <>
       {/* compact filter strips on mobile so the board stays above the fold */}
-      <div className="border-ink border-t-2 lg:hidden">
+      <div className="border-ink min-w-0 border-t-2 lg:hidden">
         <div className="flex scrollbar-none gap-2 overflow-x-auto px-3 py-3">
           {signedIn && (
             <>
