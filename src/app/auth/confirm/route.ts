@@ -1,11 +1,14 @@
 import { type EmailOtpType } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { REDIRECT_COOKIE, sanitizeRedirectPath } from '@/lib/auth/redirect'
+import { REDIRECT_COOKIE, resolveSiteOrigin, sanitizeRedirectPath } from '@/lib/auth/redirect'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
+  const { searchParams } = new URL(request.url)
+  // Not `new URL(request.url).origin`: on Render that resolves to the internal
+  // 0.0.0.0:10000 bind address and strands users post-login (see resolveSiteOrigin).
+  const origin = resolveSiteOrigin(request)
   const code = searchParams.get('code')
   const tokenHash = searchParams.get('token_hash')
   const type = searchParams.get('type') as EmailOtpType | null

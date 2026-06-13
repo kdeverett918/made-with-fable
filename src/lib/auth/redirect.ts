@@ -31,6 +31,49 @@ export function rememberRedirect(redirectTo: string | null | undefined) {
   document.cookie = `${REDIRECT_COOKIE}=${encodeURIComponent(path)}; path=/; max-age=600; samesite=lax${secure}`
 }
 
+/**
+ * The public origin to build server-side auth redirects from.
+ *
+ * On Render the standalone server binds to 0.0.0.0:10000, so
+ * `new URL(request.url).origin` is the *internal* address — redirecting there
+ * strands users on an unreachable `https://0.0.0.0:10000` page after OAuth or
+ * magic-link sign-in (password sign-in is unaffected because it redirects
+ * client-side). Resolve the real external origin instead: trust the proxy's
+ * forwarded host when it matches an allowed site host (keeps apex/www cookie
+ * consistency), else fall back to the configured NEXT_PUBLIC_SITE_URL, else the
+ * request origin (correct in local dev).
+ */
+export function resolveSiteOrigin(request: Request): string {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL
+
+  const allowedHosts = new Set<string>(['made-with-fable.onrender.com'])
+  if (configured) {
+    try {
+      const host = new URL(configured).host
+      allowedHosts.add(host)
+      allowedHosts.add(host.startsWith('www.') ? host.slice(4) : `www.${host}`)
+    } catch {
+      // malformed env — ignored, handled by the fallbacks below
+    }
+  }
+
+  const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim()
+  const forwardedProto = request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim()
+  if (forwardedHost && allowedHosts.has(forwardedHost)) {
+    return `${forwardedProto || 'https'}://${forwardedHost}`
+  }
+
+  if (configured) {
+    try {
+      return new URL(configured).origin
+    } catch {
+      // fall through to the request origin
+    }
+  }
+
+  return new URL(request.url).origin
+}
+
 export function authCallbackUrl(origin: string) {
   return new URL('/auth/callback', origin).toString()
 }
