@@ -59,10 +59,10 @@ export default async function Home({ searchParams }: HomeProps) {
         <section className="border-ink grid border-b-2 md:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
           <div className="border-ink bg-surface-raised flex items-center justify-center border-b-2 p-6 md:border-r-2 md:border-b-0">
             <Image
-              src="/rip-fable.png"
-              alt="A headstone reading R.I.P. Fable, 2025 to 2026"
-              width={896}
-              height={1152}
+              src="/rip-fable-v2.png"
+              alt="A headstone reading R.I.P. Fable"
+              width={1024}
+              height={1024}
               priority
               className="h-auto w-full max-w-[260px]"
             />
