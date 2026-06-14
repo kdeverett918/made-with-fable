@@ -40,7 +40,7 @@ async function getCreation(id: string) {
     .maybeSingle()
   return data as
     | (Creation & {
-        profiles: Profile
+        profiles: Profile | null
         creation_media: CreationMedia[]
         creation_tags: Array<{ tags: { name: string } | null }>
         categories: { slug: string; name: string }
@@ -79,8 +79,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       ? mediaUrl(creation.og_image_path)
       : siteConfig.ogImage
 
-  const description =
-    creation.story?.slice(0, 160) ?? `Made with Fable by ${creation.profiles.username}`
+  const makerName = creation.profiles?.username ?? creation.guest_name ?? 'a guest maker'
+  const description = creation.story?.slice(0, 160) ?? `Made with Fable by ${makerName}`
   const canonicalUrl = `${siteConfig.url}/c/${id}`
 
   return {
@@ -220,24 +220,38 @@ export default async function CreationPage({ params }: PageProps) {
                   </div>
                   <div className="p-4 sm:p-5">
                     <p className="label-mono text-muted font-bold">Maker</p>
-                    <Link
-                      href={`/u/${author.username}`}
-                      className="group mt-3 flex min-w-0 items-center gap-3"
-                    >
-                      <Avatar
-                        src={author.avatar_url}
-                        name={author.display_name ?? author.username}
-                        size={44}
-                      />
-                      <span className="min-w-0">
-                        <span className="group-hover:text-accent block truncate text-base font-bold uppercase transition-colors">
-                          {author.display_name ?? author.username}
+                    {author ? (
+                      <Link
+                        href={`/u/${author.username}`}
+                        className="group mt-3 flex min-w-0 items-center gap-3"
+                      >
+                        <Avatar
+                          src={author.avatar_url}
+                          name={author.display_name ?? author.username}
+                          size={44}
+                        />
+                        <span className="min-w-0">
+                          <span className="group-hover:text-accent block truncate text-base font-bold uppercase transition-colors">
+                            {author.display_name ?? author.username}
+                          </span>
+                          <span className="label-mono text-muted-foreground block truncate">
+                            @{author.username}
+                          </span>
                         </span>
-                        <span className="label-mono text-muted-foreground block truncate">
-                          @{author.username}
+                      </Link>
+                    ) : (
+                      <div className="mt-3 flex min-w-0 items-center gap-3">
+                        <Avatar src={null} name={creation.guest_name ?? 'Guest'} size={44} />
+                        <span className="min-w-0">
+                          <span className="block truncate text-base font-bold uppercase">
+                            {creation.guest_name ?? 'Guest'}
+                          </span>
+                          <span className="label-mono text-muted-foreground block truncate">
+                            Guest maker
+                          </span>
                         </span>
-                      </span>
-                    </Link>
+                      </div>
+                    )}
                   </div>
                 </aside>
               </div>
@@ -276,7 +290,11 @@ export default async function CreationPage({ params }: PageProps) {
                     />
                     <ShareButton
                       title={creation.title}
-                      text={`Made with Fable by @${author.username}`}
+                      text={
+                        author
+                          ? `Made with Fable by @${author.username}`
+                          : `Made with Fable by ${creation.guest_name ?? 'a guest'}`
+                      }
                       className="w-full"
                     />
                     <ReportDialog

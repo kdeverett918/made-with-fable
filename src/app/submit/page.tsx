@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
@@ -13,7 +12,6 @@ export default async function SubmitPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) redirect('/login?redirectTo=/submit')
 
   return (
     <>
@@ -32,8 +30,8 @@ export default async function SubmitPage() {
               <div className="p-5 sm:p-6">
                 <p className="label-mono text-muted-foreground">Review note</p>
                 <p className="text-muted mt-3 text-sm leading-relaxed">
-                  Send a project title, description, URL, and media for review. Approved projects
-                  pin to the public board.
+                  No account needed — just your name, a title, and media or a link. Every project is
+                  reviewed before it pins to the public board.
                 </p>
               </div>
               <div className="divide-ink grid grid-cols-2 divide-x-2">
@@ -51,7 +49,7 @@ export default async function SubmitPage() {
             </aside>
           </section>
 
-          <SubmitWizard userId={user.id} />
+          <SubmitWizard userId={user?.id ?? null} />
         </Container>
       </main>
       <Footer />

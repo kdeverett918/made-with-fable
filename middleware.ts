@@ -2,7 +2,8 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { sanitizeRedirectPath } from '@/lib/auth/redirect'
 
-const PROTECTED_PREFIXES = ['/submit', '/settings', '/admin']
+// /submit is intentionally open — anyone can submit a project without an account
+const PROTECTED_PREFIXES = ['/settings', '/admin']
 
 function isProtected(pathname: string) {
   return PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))

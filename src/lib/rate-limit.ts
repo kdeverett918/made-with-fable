@@ -24,4 +24,7 @@ export const RATE_LIMITS = {
   reportsPerHour: 5,
   creationsPerDay: 10,
   followsPerMinute: 30,
+  // anonymous submissions share one bucket (no account to key off), so this is a
+  // global-per-day ceiling on the guest intake to bound spam before review
+  guestCreationsPerDay: 40,
 } as const

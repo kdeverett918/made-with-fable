@@ -45,6 +45,7 @@ function toFeedItem(c: CreationWithMedia, profile: Profile): FeedItem {
     author_username: profile.username,
     author_display_name: profile.display_name,
     author_avatar_url: profile.avatar_url,
+    author_guest_name: null,
     media_kind: first?.kind ?? null,
     media_path: first?.storage_path ?? null,
     media_poster_path: first?.poster_path ?? null,

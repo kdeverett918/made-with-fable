@@ -20,7 +20,8 @@ export interface PendingCreation {
   prompt: string | null
   live_url: string | null
   created_at: string
-  profiles: { username: string; display_name: string | null; avatar_url: string | null }
+  guest_name: string | null
+  profiles: { username: string; display_name: string | null; avatar_url: string | null } | null
   creation_media: CreationMedia[]
   categories: { name: string }
   creation_tags: Array<{ tags: { name: string } | null }>
@@ -59,12 +60,15 @@ export function ModerationCard({ creation }: { creation: PendingCreation }) {
           </div>
           <div className="flex flex-wrap items-center gap-2 px-4 py-3 sm:px-5">
             <Avatar
-              src={creation.profiles.avatar_url}
-              name={creation.profiles.username}
+              src={creation.profiles?.avatar_url ?? null}
+              name={creation.profiles?.username ?? creation.guest_name ?? 'Guest'}
               size={28}
             />
             <p className="label-mono text-muted">
-              @{creation.profiles.username} /{' '}
+              {creation.profiles
+                ? `@${creation.profiles.username}`
+                : `${creation.guest_name ?? 'Guest'} (guest)`}{' '}
+              /{' '}
               <time dateTime={creation.created_at}>
                 {new Date(creation.created_at).toLocaleString()}
               </time>

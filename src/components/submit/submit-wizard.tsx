@@ -17,11 +17,15 @@ import { cn } from '@/lib/utils'
 
 const STEPS = ['Project', 'Media', 'URL & prompt', 'Review'] as const
 
-export function SubmitWizard({ userId }: { userId: string }) {
+export function SubmitWizard({ userId }: { userId: string | null }) {
   const router = useRouter()
+  const isGuest = !userId
+  const folder = userId ?? 'guest'
   const [step, setStep] = useState(0)
   const [pending, startTransition] = useTransition()
+  const [submitted, setSubmitted] = useState(false)
 
+  const [guestName, setGuestName] = useState('')
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState('')
   const [story, setStory] = useState('')
@@ -35,7 +39,8 @@ export function SubmitWizard({ userId }: { userId: string }) {
   const [tags, setTags] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
 
-  const detailsValid = title.trim().length >= 3 && category !== ''
+  const detailsValid =
+    title.trim().length >= 3 && category !== '' && (!isGuest || guestName.trim().length >= 2)
   const hasContent = media.length > 0 || liveUrl.trim() !== ''
 
   async function fetchPreview() {
@@ -64,6 +69,7 @@ export function SubmitWizard({ userId }: { userId: string }) {
         live_url: liveUrl.trim(),
         category_slug: category,
         tags,
+        guest_name: isGuest ? guestName.trim() : '',
         media: media.map(({ kind, storage_path, poster_path, width, height }) => ({
           kind,
           storage_path,
@@ -73,7 +79,13 @@ export function SubmitWizard({ userId }: { userId: string }) {
         })),
       })
       if (result.ok) {
-        router.push(`/c/${result.id}?submitted=1`)
+        // signed-in makers can view their own pending project; guests can't (RLS),
+        // so they get an inline confirmation instead of a redirect
+        if (isGuest) {
+          setSubmitted(true)
+        } else {
+          router.push(`/c/${result.id}?submitted=1`)
+        }
       } else {
         setError(result.error)
       }
@@ -81,6 +93,50 @@ export function SubmitWizard({ userId }: { userId: string }) {
   }
 
   const currentStep = STEPS[step]
+
+  if (submitted) {
+    return (
+      <section className="border-ink bg-background mt-10 border-2 shadow-[6px_6px_0_0_var(--color-ink)]">
+        <div className="border-ink border-b-2 p-6 sm:p-8">
+          <p className="label-mono text-accent font-bold">Submission received</p>
+          <h2 className="font-display mt-2 text-5xl leading-[0.9] uppercase sm:text-6xl">
+            Thanks — it&rsquo;s in the queue.
+          </h2>
+        </div>
+        <div className="space-y-5 p-6 sm:p-8">
+          <p className="text-muted max-w-xl leading-relaxed">
+            <span className="text-ink font-bold">{title.trim()}</span> was sent for review. Once
+            it&rsquo;s approved it pins to the public board, credited to{' '}
+            <span className="text-ink font-bold">{guestName.trim()}</span>.
+          </p>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button type="button" onClick={() => router.push('/')}>
+              Back to the board
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setSubmitted(false)
+                setStep(0)
+                setTitle('')
+                setCategory('')
+                setStory('')
+                setMedia([])
+                setLiveUrl('')
+                setPreview(null)
+                setPrompt('')
+                setTags([])
+                setError(null)
+              }}
+            >
+              Submit another
+            </Button>
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="mt-10 grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
@@ -139,6 +195,23 @@ export function SubmitWizard({ userId }: { userId: string }) {
         <div className="space-y-6 p-4 sm:p-6">
           {step === 0 && (
             <div className="space-y-6">
+              {isGuest && (
+                <label className="block">
+                  <span className="label-mono mb-2 block font-bold">Your name</span>
+                  <Input
+                    value={guestName}
+                    onChange={(e) => setGuestName(e.target.value)}
+                    placeholder="The name to credit on the board"
+                    maxLength={60}
+                    autoFocus
+                    className="h-12 text-base"
+                  />
+                  <span className="label-mono text-muted-foreground mt-2 block">
+                    No account needed — this is just the maker credit shown on your project.
+                  </span>
+                </label>
+              )}
+
               <label className="block">
                 <span className="label-mono mb-2 block font-bold">Project title</span>
                 <Input
@@ -146,7 +219,7 @@ export function SubmitWizard({ userId }: { userId: string }) {
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="What did you make?"
                   maxLength={120}
-                  autoFocus
+                  autoFocus={!isGuest}
                   className="h-12 text-base"
                 />
               </label>
@@ -195,7 +268,7 @@ export function SubmitWizard({ userId }: { userId: string }) {
             </div>
           )}
 
-          {step === 1 && <MediaUploader userId={userId} items={media} onChange={setMedia} />}
+          {step === 1 && <MediaUploader folder={folder} items={media} onChange={setMedia} />}
 
           {step === 2 && (
             <div className="space-y-6">

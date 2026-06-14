@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { fetchFeedPage, fetchFollowedAuthorIds, type FeedSort } from '@/lib/feed'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { Header } from '@/components/layout/header'
@@ -55,12 +56,46 @@ export default async function Home({ searchParams }: HomeProps) {
           Made with Fable
         </h1>
 
+        <section className="border-ink grid border-b-2 md:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
+          <div className="border-ink bg-surface-raised flex items-center justify-center border-b-2 p-6 md:border-r-2 md:border-b-0">
+            <Image
+              src="/rip-fable.png"
+              alt="A headstone reading R.I.P. Fable, 2025 to 2026"
+              width={896}
+              height={1152}
+              priority
+              className="h-auto w-full max-w-[260px]"
+            />
+          </div>
+          <div className="flex flex-col justify-center gap-4 p-6 sm:p-8">
+            <p className="label-mono text-accent font-bold">In memoriam · 2025—2026</p>
+            <h2 className="font-display text-4xl leading-[0.9] uppercase sm:text-5xl">
+              Fable is gone.
+              <br />
+              The work it made lives on.
+            </h2>
+            <p className="text-muted max-w-xl leading-relaxed text-pretty">
+              Claude Fable 5 has been retired. This board keeps the projects people built with it
+              online — games, tools, songs, sites. Add yours so it doesn&rsquo;t disappear. No
+              account needed.
+            </p>
+            <div>
+              <Link
+                href="/submit"
+                className="label-mono bg-accent text-on-accent hover:bg-accent-deep inline-block px-4 py-2.5 font-bold transition-colors"
+              >
+                Post your project →
+              </Link>
+            </div>
+          </div>
+        </section>
+
         <div className="border-ink grid grid-cols-1 border-b-2 sm:grid-cols-2 lg:grid-cols-4">
           <p className="label-mono text-ink px-4 py-3">
-            A community gallery showcasing projects made with Fable.
+            A community archive of everything made with Fable.
           </p>
           <p className="label-mono text-muted border-ink px-4 py-3 sm:border-l-2">
-            Browse. Get inspired. Submit your work.
+            Browse the board. Add your own — no sign-up.
           </p>
           <p className="label-mono border-ink px-4 py-3 lg:border-l-2">
             Total projects: <span className="text-accent font-bold">{totalApproved}</span>

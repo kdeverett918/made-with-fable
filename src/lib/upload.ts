@@ -18,7 +18,14 @@ export const MAX_IMAGES = 6
 export const MAX_VIDEO_BYTES = 25 * 1024 * 1024
 export const MAX_VIDEO_SECONDS = 65
 
-export async function processAndUploadImage(file: File, userId: string): Promise<UploadedMedia> {
+/**
+ * Storage folder for a submitter's media. Signed-in users write to their own
+ * uid folder; anonymous submitters share the public `guest/` intake folder
+ * (see the storage policies in migration 007).
+ */
+export const GUEST_FOLDER = 'guest'
+
+export async function processAndUploadImage(file: File, folder: string): Promise<UploadedMedia> {
   const compressed = await imageCompression(file, {
     maxWidthOrHeight: 1920,
     maxSizeMB: 4,
@@ -30,7 +37,7 @@ export async function processAndUploadImage(file: File, userId: string): Promise
   const { width, height } = bitmap
   bitmap.close()
 
-  const path = `${userId}/${nanoid(12)}.webp`
+  const path = `${folder}/${nanoid(12)}.webp`
   const supabase = createSupabaseBrowserClient()
   const { error } = await supabase.storage
     .from('media')
@@ -83,7 +90,7 @@ function capturePoster(video: HTMLVideoElement): Promise<Blob> {
   })
 }
 
-export async function processAndUploadVideo(file: File, userId: string): Promise<UploadedMedia> {
+export async function processAndUploadVideo(file: File, folder: string): Promise<UploadedMedia> {
   if (!['video/mp4', 'video/webm'].includes(file.type)) {
     throw new Error('Videos must be MP4 or WebM')
   }
@@ -102,8 +109,8 @@ export async function processAndUploadVideo(file: File, userId: string): Promise
 
   const id = nanoid(12)
   const ext = file.type === 'video/webm' ? 'webm' : 'mp4'
-  const videoPath = `${userId}/${id}.${ext}`
-  const posterPath = `${userId}/${id}-poster.webp`
+  const videoPath = `${folder}/${id}.${ext}`
+  const posterPath = `${folder}/${id}-poster.webp`
 
   const supabase = createSupabaseBrowserClient()
   const [videoRes, posterRes] = await Promise.all([

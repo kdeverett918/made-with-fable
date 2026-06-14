@@ -25,7 +25,8 @@ export interface Category {
 
 export interface Creation {
   id: string
-  author_id: string
+  author_id: string | null
+  guest_name: string | null
   title: string
   story: string | null
   prompt: string | null
@@ -88,9 +89,10 @@ export interface FeedItem {
   like_count: number
   comment_count: number
   approved_at: string
-  author_username: string
+  author_username: string | null
   author_display_name: string | null
   author_avatar_url: string | null
+  author_guest_name: string | null
   media_kind: MediaKind | null
   media_path: string | null
   media_poster_path: string | null

@@ -13,12 +13,13 @@ import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
 
 interface MediaUploaderProps {
-  userId: string
+  /** storage folder to upload into — a user's uid, or the shared guest folder */
+  folder: string
   items: UploadedMedia[]
   onChange: (items: UploadedMedia[]) => void
 }
 
-export function MediaUploader({ userId, items, onChange }: MediaUploaderProps) {
+export function MediaUploader({ folder, items, onChange }: MediaUploaderProps) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const [uploadingCount, setUploadingCount] = useState(0)
@@ -48,8 +49,8 @@ export function MediaUploader({ userId, items, onChange }: MediaUploaderProps) {
       setUploadingCount((c) => c + 1)
       try {
         const uploaded = isVideo
-          ? await processAndUploadVideo(file, userId)
-          : await processAndUploadImage(file, userId)
+          ? await processAndUploadVideo(file, folder)
+          : await processAndUploadImage(file, folder)
         if (isVideo) video = true
         else images++
         current.push(uploaded)

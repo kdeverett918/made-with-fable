@@ -47,7 +47,7 @@ export default async function AdminPage({ searchParams }: PageProps) {
     const { data } = await supabase
       .from('creations')
       .select(
-        'id, title, status, like_count, created_at, profiles!creations_author_id_fkey(username)',
+        'id, title, status, like_count, created_at, guest_name, profiles!creations_author_id_fkey(username)',
       )
       .order('created_at', { ascending: false })
       .limit(100)

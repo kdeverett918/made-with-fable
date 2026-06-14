@@ -76,12 +76,15 @@ export async function notifyAdminOfSubmission(input: {
 }
 
 export async function notifyAuthorOfDecision(input: {
-  authorId: string
+  authorId: string | null
   title: string
   creationId: string
   approved: boolean
   reason?: string | null
 }) {
+  // anonymous (guest) submissions have no account to email
+  if (!input.authorId) return
+
   let email: string | null = null
   try {
     const admin = createSupabaseAdminClient()

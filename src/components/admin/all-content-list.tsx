@@ -12,6 +12,7 @@ export interface ContentRow {
   status: 'pending' | 'approved' | 'rejected'
   like_count: number
   created_at: string
+  guest_name: string | null
   profiles: { username: string } | null
 }
 
@@ -50,7 +51,8 @@ export function AllContentList({ rows }: { rows: ContentRow[] }) {
                 {row.title}
               </Link>
               <p className="label-mono text-muted-foreground mt-1">
-                @{row.profiles?.username ?? '?'} / {row.like_count} likes /{' '}
+                {row.profiles ? `@${row.profiles.username}` : `${row.guest_name ?? 'Guest'} (guest)`}{' '}
+                / {row.like_count} likes /{' '}
                 <time dateTime={row.created_at}>
                   {new Date(row.created_at).toLocaleDateString()}
                 </time>

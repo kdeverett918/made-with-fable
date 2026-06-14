@@ -113,7 +113,9 @@ export function CreationCard({
           <h3 className="line-clamp-2 min-h-[2lh] text-base leading-[0.98] font-black tracking-wide break-words uppercase">
             {item.title}
           </h3>
-          <p className="label-mono text-muted mt-2 truncate">by @{item.author_username}</p>
+          <p className="label-mono text-muted mt-2 truncate">
+            {item.author_username ? `by @${item.author_username}` : `by ${item.author_guest_name}`}
+          </p>
         </div>
 
         {/* media area */}

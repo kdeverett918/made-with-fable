@@ -1,17 +1,12 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { fetchOgPreview } from '@/lib/og-fetch'
 
 const bodySchema = z.object({ url: z.url().max(2000) })
 
+// Open to anonymous submitters too — link previews are part of the no-login
+// submit flow. fetchOgPreview enforces SSRF protection (private ranges blocked).
 export async function POST(request: Request) {
-  const supabase = await createSupabaseServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-
   const parsed = bodySchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: 'invalid url' }, { status: 400 })
 
