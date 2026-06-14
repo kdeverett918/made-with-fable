@@ -7,8 +7,11 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { fetchOgPreview, downloadOgImage } from '@/lib/og-fetch'
 import { fetchRecentCounts, RATE_LIMITS } from '@/lib/rate-limit'
-import { GUEST_FOLDER } from '@/lib/upload'
 import { notifyAdminOfSubmission } from '@/lib/email'
+
+// shared anonymous-upload folder. Kept as a literal here (not imported from the
+// 'use client' upload module) so it resolves correctly across the server boundary.
+const GUEST_FOLDER = 'guest'
 
 const mediaItemSchema = z.object({
   kind: z.enum(['image', 'video']),
