@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
@@ -33,6 +34,18 @@ export default async function SubmitPage() {
                   No account needed — just your name, a title, and media or a link. Every project is
                   reviewed before it pins to the public board.
                 </p>
+                {!user && (
+                  <p className="label-mono text-muted-foreground mt-4">
+                    Want a profile to keep your projects together?{' '}
+                    <Link
+                      href="/login?redirectTo=/submit"
+                      className="text-accent font-bold hover:underline"
+                    >
+                      Sign in
+                    </Link>{' '}
+                    — optional.
+                  </p>
+                )}
               </div>
               <div className="divide-ink grid grid-cols-2 divide-x-2">
                 <div className="p-5">
