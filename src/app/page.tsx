@@ -68,7 +68,7 @@ export default async function Home({ searchParams }: HomeProps) {
             />
           </div>
           <div className="flex flex-col justify-center gap-4 p-6 sm:p-8">
-            <p className="label-mono text-accent font-bold">In memoriam · 2025—2026</p>
+            <p className="label-mono text-accent font-bold">In memoriam</p>
             <h2 className="font-display text-4xl leading-[0.9] uppercase sm:text-5xl">
               Fable is gone.
               <br />

@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Spinner } from '@/components/ui/spinner'
 import { CATEGORIES } from '@/types/database'
 import type { UploadedMedia } from '@/lib/upload'
+import { normalizeUrl } from '@/lib/url'
 import { cn } from '@/lib/utils'
 
 const STEPS = ['Project', 'Media', 'URL & prompt', 'Review'] as const
@@ -44,14 +45,16 @@ export function SubmitWizard({ userId }: { userId: string | null }) {
   const hasContent = media.length > 0 || liveUrl.trim() !== ''
 
   async function fetchPreview() {
-    if (!liveUrl) return
+    const url = normalizeUrl(liveUrl)
+    if (!url) return
+    setLiveUrl(url)
     setPreviewLoading(true)
     setPreview(null)
     try {
       const res = await fetch('/api/og-preview', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ url: liveUrl }),
+        body: JSON.stringify({ url }),
       })
       if (res.ok) setPreview(await res.json())
     } finally {
@@ -278,10 +281,12 @@ export function SubmitWizard({ userId }: { userId: string | null }) {
                 </span>
                 <div className="flex flex-col gap-2 sm:flex-row">
                   <Input
-                    type="url"
+                    type="text"
+                    inputMode="url"
                     value={liveUrl}
                     onChange={(e) => setLiveUrl(e.target.value)}
-                    placeholder="https://your-project.example.com"
+                    onBlur={() => setLiveUrl((u) => normalizeUrl(u))}
+                    placeholder="your-project.example.com"
                     className="h-12"
                   />
                   <Button
